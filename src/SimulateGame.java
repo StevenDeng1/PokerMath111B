@@ -80,7 +80,7 @@ Remove cards from deck, setting the idx associated with card to null and then ad
     }
 
     public int getCardInRange(){
-        return (int)(Math.random()*51);
+        return (int)(Math.random()*52);
     }
 
 }

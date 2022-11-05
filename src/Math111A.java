@@ -8,12 +8,11 @@ public class Math111A {
         Cards cards = new Cards();
         List<Cards.Card> deck = cards.deck;
         SimulateGame game = new SimulateGame(deck);
-        for (int i = 0; i <= 1000000; i++) {
+        int totalSimulations = 1000000;
+        for (int i = 0; i <= totalSimulations; i++) {
             game.play();
         }
-
-        System.out.println(Rules.straightCounter);
-        //System.out.printf("straight counter %.4f%n", (double) Rules.straightCounter/100000);
+        System.out.println(Rules.flushCount/totalSimulations);
     }
 
 /*

@@ -5,7 +5,9 @@ import org.apache.commons.lang3.ArrayUtils;
 import java.util.*;
 
 public class Rules {
-    static int straightCounter = 0;
+
+    public static double flushCount = 0;
+
     public enum PokerHand{
         High_Card,
         Pair,
@@ -40,15 +42,12 @@ public class Rules {
         //pair.
         Cards.Card[] hand = ArrayUtils.addAll(pair, fiveCards);
         Arrays.sort(hand, Comparator.comparing(card -> card.value));
-        Pair<Boolean, Cards.Card[]> straightResults = hasStraight(hand);
-        if(hasStraight(hand).getKey()){
-            //System.out.printf("pair1: %s%n", Arrays.toString(pair));
-            //System.out.printf("fiveCard: %s%n", Arrays.toString(fiveCards));
-            //System.out.printf("hand: %s%n", Arrays.toString(hand));
-            //System.out.println("~~~~~~");
-           // System.out.println(Arrays.toString(straightResults.getValue()));
-           // System.out.println();
-            straightCounter++;
+        //Pair<Boolean, Cards.Card[]> straightResults = hasStraight(hand);
+        Pair<Boolean, Cards.Card[]> flushResults = hasFlush(hand);
+        if(flushResults.getKey()) {
+            System.out.println(Arrays.toString(hand));
+            System.out.println(Arrays.toString(flushResults.getValue()));
+            flushCount++;
         }
         return null;
     }
@@ -64,8 +63,17 @@ public class Rules {
     public Pair<Boolean, Cards.Card[]> hasFourOfAKind(){
         return new Pair<>(false, null);
     }
-    public Pair<Boolean, Cards.Card[]> hasFlush(Cards.Card[] hand){
-
+    public static Pair<Boolean, Cards.Card[]> hasFlush(Cards.Card[] hand){
+        Map<Character, List<Cards.Card>> suitMap = new HashMap<>();
+        //
+        for(int i=hand.length-1; i>=0; i--) {
+            Cards.Card currCard = hand[i];
+            suitMap.computeIfAbsent(currCard.suit, k -> new ArrayList<>())
+                    .add(currCard);
+            if(suitMap.get(currCard.suit).size() == 5){
+                return new Pair<>(true, suitMap.get(currCard.suit).toArray(Cards.Card[]::new));
+            }
+        }
         return new Pair<>(false, null);
     }
     public static Pair<Boolean, Cards.Card[]> hasStraight(Cards.Card[] hand){
