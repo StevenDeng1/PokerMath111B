@@ -44,14 +44,16 @@ public class Rules {
 
         Cards.Card[] hand = ArrayUtils.addAll(pair, fiveCards);
         Arrays.sort(hand, Comparator.comparing(card -> card.value));
-        Pair<Boolean, Cards.Card[]> fourOfAKindResults = hasFourOfAKind(hand);
+        Pair<Boolean, Cards.Card[]> hasRoyalFlushResults = hasRoyalFlush(hand);
+        //Pair<Boolean, Cards.Card[]> hasStraightFlushResults = hasStraightFlush(hand);
+        //Pair<Boolean, Cards.Card[]> fourOfAKindResults = hasFourOfAKind(hand);
         //Pair<Boolean, Cards.Card[]> straightResults = hasStraight(hand);
         //Pair<Boolean, Cards.Card[]> flushResults = hasFlush(hand);
         //Pair<Boolean, Cards.Card[]> twoPairResults = hasTwoPair(hand);
         //Pair<Boolean, Cards.Card[]> pairResults = hasPair(hand);
         //Pair<Boolean, Cards.Card[]> threeOfAKindResults = hasThreeOfAKind(hand);
 
-        results = fourOfAKindResults;
+        results = hasRoyalFlushResults;
         if(results.getKey()) {
             System.out.println(Arrays.toString(results.getValue()));
             statCount++;
@@ -68,9 +70,37 @@ public class Rules {
         return false;
     }
     public static Pair<Boolean, Cards.Card[]> hasRoyalFlush(Cards.Card[] hand){
+        Set<Integer> royalFlushValues = new HashSet<>();
+        Pair<Boolean, Cards.Card[]> possibleRoyal = hasStraightFlush(hand);
+        if(possibleRoyal.getKey()){
+            for(Cards.Card card: possibleRoyal.getValue()){
+                if(card.value.getCardValue() >= 10 && card.value.getCardValue() <= 14){
+                    royalFlushValues.add(card.value.getCardValue());
+                }
+                else {
+                    return new Pair<>(false, null);
+                }
+            }
+        }
+        if(royalFlushValues.size()==5){
+            return possibleRoyal;
+        }
         return new Pair<>(false, null);
     }
     public static Pair<Boolean, Cards.Card[]> hasStraightFlush(Cards.Card[] hand){
+        Map<Character, List<Cards.Card>> suitMap = new HashMap<>();
+        //
+        for(int i=hand.length-1; i>=0; i--) {
+            Cards.Card currCard = hand[i];
+            suitMap.computeIfAbsent(currCard.suit, k -> new ArrayList<>())
+                    .add(currCard);
+        }
+        for(List<Cards.Card> cardsWithSuit : suitMap.values()){
+            if(cardsWithSuit.size() >= 5) { //checks if there is at least 5 elements
+                cardsWithSuit.sort(Comparator.comparing(card -> card.value));
+                return hasStraight(cardsWithSuit.toArray(Cards.Card[]::new));
+            }
+        }
         return new Pair<>(false, null);
     }
     public static Pair<Boolean, Cards.Card[]> hasFourOfAKind(Cards.Card[] hand){
