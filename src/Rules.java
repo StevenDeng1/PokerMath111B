@@ -44,12 +44,14 @@ public class Rules {
 
         Cards.Card[] hand = ArrayUtils.addAll(pair, fiveCards);
         Arrays.sort(hand, Comparator.comparing(card -> card.value));
+        Pair<Boolean, Cards.Card[]> fourOfAKindResults = hasFourOfAKind(hand);
         //Pair<Boolean, Cards.Card[]> straightResults = hasStraight(hand);
         //Pair<Boolean, Cards.Card[]> flushResults = hasFlush(hand);
         //Pair<Boolean, Cards.Card[]> twoPairResults = hasTwoPair(hand);
         //Pair<Boolean, Cards.Card[]> pairResults = hasPair(hand);
-        Pair<Boolean, Cards.Card[]> threeOfAKindResults = hasThreeOfAKind(hand);
-        results = threeOfAKindResults;
+        //Pair<Boolean, Cards.Card[]> threeOfAKindResults = hasThreeOfAKind(hand);
+
+        results = fourOfAKindResults;
         if(results.getKey()) {
             System.out.println(Arrays.toString(results.getValue()));
             statCount++;
@@ -72,6 +74,17 @@ public class Rules {
         return new Pair<>(false, null);
     }
     public static Pair<Boolean, Cards.Card[]> hasFourOfAKind(Cards.Card[] hand){
+        for(int i=hand.length-4; i>=0; i--) {
+            Cards.Card leftCard = hand[i];
+            Cards.Card lMidCard = hand[i+1];
+            Cards.Card rMidCard = hand[i+2];
+            Cards.Card rightCard = hand[i+3];
+            if(leftCard.value.getCardValue() == lMidCard.value.getCardValue() &&
+                    lMidCard.value.getCardValue() == rightCard.value.getCardValue() &&
+                    rMidCard.value.getCardValue() == rightCard.value.getCardValue()) {
+                return new Pair<>(true, new Cards.Card[]{leftCard, lMidCard, rMidCard, rightCard});
+            }
+        }
         return new Pair<>(false, null);
     }
     public static Pair<Boolean, Cards.Card[]> hasFlush(Cards.Card[] hand){
@@ -133,11 +146,7 @@ public class Rules {
         }
         return new Pair<>(false, null);
     }
-    public Pair<Boolean, Cards.Card[]> hasThreeOfAKind(){
-        return new Pair<>(false, null);
-    }
     public static Pair<Boolean, Cards.Card[]> hasThreeOfAKind(Cards.Card[] hand) {
-
         for(int i=hand.length-3; i>=0; i--) {
             Cards.Card leftCard = hand[i];
             Cards.Card midCard = hand[i+1];
