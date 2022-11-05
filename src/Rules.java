@@ -44,9 +44,10 @@ public class Rules {
         Arrays.sort(hand, Comparator.comparing(card -> card.value));
         //Pair<Boolean, Cards.Card[]> straightResults = hasStraight(hand);
         //Pair<Boolean, Cards.Card[]> flushResults = hasFlush(hand);
-        Pair<Boolean, Cards.Card[]> twoPairResults = hasTwoPair(hand);
-        if(twoPairResults.getKey()) {
-            System.out.println(Arrays.toString(twoPairResults.getValue()));
+        //Pair<Boolean, Cards.Card[]> twoPairResults = hasTwoPair(hand);
+        Pair<Boolean, Cards.Card[]> pairResults = hasPair(hand);
+        if(pairResults.getKey()) {
+            System.out.println(Arrays.toString(pairResults.getValue()));
             statCount++;
         }
         /*
@@ -60,13 +61,13 @@ public class Rules {
     public boolean checkHands(){
         return false;
     }
-    public static Pair<Boolean, Cards.Card[]> hasRoyalFlush(){
+    public static Pair<Boolean, Cards.Card[]> hasRoyalFlush(Cards.Card[] hand){
         return new Pair<>(false, null);
     }
-    public static Pair<Boolean, Cards.Card[]> hasStraightFlush(){
+    public static Pair<Boolean, Cards.Card[]> hasStraightFlush(Cards.Card[] hand){
         return new Pair<>(false, null);
     }
-    public static Pair<Boolean, Cards.Card[]> hasFourOfAKind(){
+    public static Pair<Boolean, Cards.Card[]> hasFourOfAKind(Cards.Card[] hand){
         return new Pair<>(false, null);
     }
     public static Pair<Boolean, Cards.Card[]> hasFlush(Cards.Card[] hand){
@@ -157,7 +158,16 @@ public class Rules {
         }
         return new Pair<>(false, null);
     }
-    public static Pair<Boolean, Cards.Card[]> hasPair(){
+    public static Pair<Boolean, Cards.Card[]> hasPair(Cards.Card[] hand){
+        Cards.Card previousCheckedCard = hand[hand.length-1];
+        for(int i=hand.length-2; i>=0; i--) {
+            Cards.Card currCard = hand[i];
+            if(previousCheckedCard.value.getCardValue() == currCard.value.getCardValue()){
+                return new Pair<>(true, new Cards.Card[]{previousCheckedCard, currCard});
+            }
+            previousCheckedCard = currCard;
+        }
+
         return new Pair<>(false, null);
     }
 }
