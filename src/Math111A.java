@@ -12,7 +12,7 @@ public class Math111A {
         for (int i = 0; i <= totalSimulations; i++) {
             game.play();
         }
-        System.out.println(Rules.flushCount/totalSimulations);
+        System.out.println(Rules.statCount/totalSimulations);
     }
 
 /*

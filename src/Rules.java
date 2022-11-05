@@ -6,7 +6,7 @@ import java.util.*;
 
 public class Rules {
 
-    public static double flushCount = 0;
+    public static double statCount = 0;
 
     public enum PokerHand{
         High_Card,
@@ -43,24 +43,30 @@ public class Rules {
         Cards.Card[] hand = ArrayUtils.addAll(pair, fiveCards);
         Arrays.sort(hand, Comparator.comparing(card -> card.value));
         //Pair<Boolean, Cards.Card[]> straightResults = hasStraight(hand);
-        Pair<Boolean, Cards.Card[]> flushResults = hasFlush(hand);
+        //Pair<Boolean, Cards.Card[]> flushResults = hasFlush(hand);
+        Pair<Boolean, Cards.Card[]> twoPairResults = hasTwoPair(hand);
+        if(twoPairResults.getKey()) {
+            System.out.println(Arrays.toString(twoPairResults.getValue()));
+            statCount++;
+        }
+        /*
         if(flushResults.getKey()) {
             System.out.println(Arrays.toString(hand));
             System.out.println(Arrays.toString(flushResults.getValue()));
             flushCount++;
-        }
+        }*/
         return null;
     }
     public boolean checkHands(){
         return false;
     }
-    public Pair<Boolean, Cards.Card[]> hasRoyalFlush(){
+    public static Pair<Boolean, Cards.Card[]> hasRoyalFlush(){
         return new Pair<>(false, null);
     }
-    public Pair<Boolean, Cards.Card[]> hasStraightFlush(){
+    public static Pair<Boolean, Cards.Card[]> hasStraightFlush(){
         return new Pair<>(false, null);
     }
-    public Pair<Boolean, Cards.Card[]> hasFourOfAKind(){
+    public static Pair<Boolean, Cards.Card[]> hasFourOfAKind(){
         return new Pair<>(false, null);
     }
     public static Pair<Boolean, Cards.Card[]> hasFlush(Cards.Card[] hand){
@@ -125,10 +131,33 @@ public class Rules {
     public Pair<Boolean, Cards.Card[]> hasThreeOfAKind(){
         return new Pair<>(false, null);
     }
-    public Pair<Boolean, Cards.Card[]> hasTwoPair(Cards.Card[] hand){
+    public static Pair<Boolean, Cards.Card[]> hasTwoPair(Cards.Card[] hand){
+        int numPairs = 0;
+        int firstLargestPair = -1;
+        Map<Integer, List<Cards.Card>> rankCardMap = new HashMap<>();
+        for(int i=hand.length-1; i>=0; i--) {
+            Cards.Card currCard = hand[i];
+            rankCardMap.computeIfAbsent(currCard.value.getCardValue(), k-> new ArrayList<>())
+                    .add(currCard);
+            if(rankCardMap.get(currCard.value.getCardValue()).size()==2) {
+                numPairs++;
+                if(numPairs == 1){
+                    firstLargestPair = currCard.value.getCardValue();
+                }
+                if(numPairs == 2){
+                    List<Cards.Card> twoPair = rankCardMap.get(currCard.value.getCardValue());
+                    twoPair.addAll(rankCardMap.get(firstLargestPair));
+                    if(twoPair.size()>4){//happens in the full house case but ignore case handled upstream
+                        return new Pair<>(false, null);
+                    }
+                    return new Pair<>(true, twoPair.toArray(Cards.Card[]::new));
+                }
+            }
+
+        }
         return new Pair<>(false, null);
     }
-    public Pair<Boolean, Cards.Card[]> hasPair(){
+    public static Pair<Boolean, Cards.Card[]> hasPair(){
         return new Pair<>(false, null);
     }
 }
