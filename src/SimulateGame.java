@@ -9,6 +9,7 @@ public class SimulateGame {
         this.deck = deck;
         removedMap= new HashMap<>();
     }
+
     public void play() {
         Cards.Card[] pair1 = removeCards(2);
         Cards.Card[] pair2 = removeCards(2);
@@ -19,14 +20,17 @@ public class SimulateGame {
         burn();
         Cards.Card[] river = removeCards(1);
 
-        System.out.printf("pair1: %s%n", Arrays.toString(pair1));
-        System.out.printf("pair2: %s%n", Arrays.toString(pair2));
+        //System.out.printf("pair1: %s%n", Arrays.toString(pair1));
+        //System.out.printf("pair2: %s%n", Arrays.toString(pair2));
 
-        System.out.printf("flop: %s%n", Arrays.toString(flop));
-        System.out.printf("turn: %s%n", Arrays.toString(turn));
-        System.out.printf("river: %s%n", Arrays.toString(river));
-        System.out.println(Arrays.toString(merge5Cards(flop, turn, river)));
+        Cards.Card[] fiveCard = merge5Cards(flop, turn, river);
 
+        //System.out.printf("fiveCard: %s%n", Arrays.toString(fiveCard));
+        Rules.getHighestHandRank(pair1, fiveCard);
+
+        //System.out.println(Rules.straightCounter);
+        //System.out.printf("straight counter %.2f%n", (double) Rules.straightCounter/1000);
+       // System.out.println();
 
         reset();
     }
@@ -77,12 +81,6 @@ Remove cards from deck, setting the idx associated with card to null and then ad
 
     public int getCardInRange(){
         return (int)(Math.random()*51);
-    }
-
-
-
-    class Rules{
-
     }
 
 }
