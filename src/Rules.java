@@ -40,14 +40,18 @@ public class Rules {
     public static List<String> getHighestHandRank(Cards.Card[] pair, Cards.Card[] fiveCards){
         //System.out.println(PokerHand.Flush.compareTo(PokerHand.High_Card));
         //pair.
+        Pair<Boolean, Cards.Card[]> results = null;//delete after
+
         Cards.Card[] hand = ArrayUtils.addAll(pair, fiveCards);
         Arrays.sort(hand, Comparator.comparing(card -> card.value));
         //Pair<Boolean, Cards.Card[]> straightResults = hasStraight(hand);
         //Pair<Boolean, Cards.Card[]> flushResults = hasFlush(hand);
         //Pair<Boolean, Cards.Card[]> twoPairResults = hasTwoPair(hand);
-        Pair<Boolean, Cards.Card[]> pairResults = hasPair(hand);
-        if(pairResults.getKey()) {
-            System.out.println(Arrays.toString(pairResults.getValue()));
+        //Pair<Boolean, Cards.Card[]> pairResults = hasPair(hand);
+        Pair<Boolean, Cards.Card[]> threeOfAKindResults = hasThreeOfAKind(hand);
+        results = threeOfAKindResults;
+        if(results.getKey()) {
+            System.out.println(Arrays.toString(results.getValue()));
             statCount++;
         }
         /*
@@ -130,6 +134,19 @@ public class Rules {
         return new Pair<>(false, null);
     }
     public Pair<Boolean, Cards.Card[]> hasThreeOfAKind(){
+        return new Pair<>(false, null);
+    }
+    public static Pair<Boolean, Cards.Card[]> hasThreeOfAKind(Cards.Card[] hand) {
+
+        for(int i=hand.length-3; i>=0; i--) {
+            Cards.Card leftCard = hand[i];
+            Cards.Card midCard = hand[i+1];
+            Cards.Card rightCard = hand[i+2];
+            if(leftCard.value.getCardValue() == midCard.value.getCardValue() &&
+                    midCard.value.getCardValue() == rightCard.value.getCardValue()) {
+                return new Pair<>(true, new Cards.Card[]{leftCard, midCard, rightCard});
+            }
+        }
         return new Pair<>(false, null);
     }
     public static Pair<Boolean, Cards.Card[]> hasTwoPair(Cards.Card[] hand){
