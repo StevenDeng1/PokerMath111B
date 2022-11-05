@@ -40,20 +40,22 @@ public class Rules {
     public static List<String> getHighestHandRank(Cards.Card[] pair, Cards.Card[] fiveCards){
         //System.out.println(PokerHand.Flush.compareTo(PokerHand.High_Card));
         //pair.
-        Pair<Boolean, Cards.Card[]> results = null;//delete after
 
         Cards.Card[] hand = ArrayUtils.addAll(pair, fiveCards);
         Arrays.sort(hand, Comparator.comparing(card -> card.value));
-        Pair<Boolean, Cards.Card[]> hasRoyalFlushResults = hasRoyalFlush(hand);
-        //Pair<Boolean, Cards.Card[]> hasStraightFlushResults = hasStraightFlush(hand);
+
+        Pair<Boolean, Cards.Card[]> results = null;
+        //Pair<Boolean, Cards.Card[]> RoyalFlushResults = hasRoyalFlush(hand);
+        //Pair<Boolean, Cards.Card[]> StraightFlushResults = hasStraightFlush(hand);
         //Pair<Boolean, Cards.Card[]> fourOfAKindResults = hasFourOfAKind(hand);
-        //Pair<Boolean, Cards.Card[]> straightResults = hasStraight(hand);
+        Pair<Boolean, Cards.Card[]> fullHouseResults = hasFullHouse(hand);
         //Pair<Boolean, Cards.Card[]> flushResults = hasFlush(hand);
+        //Pair<Boolean, Cards.Card[]> straightResults = hasStraight(hand);
+        //Pair<Boolean, Cards.Card[]> threeOfAKindResults = hasThreeOfAKind(hand);
         //Pair<Boolean, Cards.Card[]> twoPairResults = hasTwoPair(hand);
         //Pair<Boolean, Cards.Card[]> pairResults = hasPair(hand);
-        //Pair<Boolean, Cards.Card[]> threeOfAKindResults = hasThreeOfAKind(hand);
 
-        results = hasRoyalFlushResults;
+        results = fullHouseResults;
         if(results.getKey()) {
             System.out.println(Arrays.toString(results.getValue()));
             statCount++;
@@ -114,6 +116,32 @@ public class Rules {
                     rMidCard.value.getCardValue() == rightCard.value.getCardValue()) {
                 return new Pair<>(true, new Cards.Card[]{leftCard, lMidCard, rMidCard, rightCard});
             }
+        }
+        return new Pair<>(false, null);
+    }
+    public static Pair<Boolean, Cards.Card[]> hasFullHouse(Cards.Card[] hand){
+        List<List<Cards.Card>> cardsByRank = new ArrayList<>(12);
+        for(int i=0; i<14; i++){
+            cardsByRank.add(new ArrayList<>());
+        }
+        for(int i=hand.length-1; i>=0; i--) {
+            Cards.Card currCard = hand[i];
+            cardsByRank.get(currCard.value.getCardValue()-2).add(currCard);
+        }
+
+        List<Cards.Card> highestTriplet = null;
+        List<Cards.Card> highestPair = null;
+        for(int i=13; i>=0; i--){
+            if(cardsByRank.get(i).size() == 2 || (highestTriplet != null && cardsByRank.get(i).size() == 3)){
+                highestPair = cardsByRank.get(i).subList(0,2);
+            }
+            if(cardsByRank.get(i).size() == 3){
+                highestTriplet = cardsByRank.get(i);
+            }
+        }
+        if(highestTriplet != null && highestPair != null){
+            highestTriplet.addAll(highestPair);
+            return new Pair<>(true, highestTriplet.toArray(Cards.Card[]::new));
         }
         return new Pair<>(false, null);
     }
