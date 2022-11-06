@@ -8,11 +8,24 @@ public class Math111A {
         Cards cards = new Cards();
         List<Cards.Card> deck = cards.deck;
         SimulateGame game = new SimulateGame(deck);
-        int totalSimulations = 1000000;
+        int totalSimulations = 20;
         for (int i = 0; i <= totalSimulations; i++) {
             game.play();
         }
-        System.out.println(Rules.statCount/totalSimulations);
+
+        /* // Calculates odds all acccurate
+        System.out.printf("Royal Flush: %4f%n", Rules.rfCount/totalSimulations);
+        System.out.printf("Straight Flush: %4f%n", Rules.sfCount/totalSimulations);
+       System.out.printf("4 of a kind: %4f%n", Rules.quadCount/totalSimulations);
+       System.out.printf("Full House: %4f%n", Rules.fhCount/totalSimulations);
+       System.out.printf("Flush : %4f%n", Rules.flushCount/totalSimulations);
+       System.out.printf("Straight: %4f%n", Rules.straightCount/totalSimulations);
+       System.out.printf("3 of a Kind: %4f%n", Rules.threeKindCount/totalSimulations);
+       System.out.printf("Two Pair: %4f%n", Rules.twoPairCount/totalSimulations);
+       System.out.printf("Pair: %4f%n", Rules.pairCount/totalSimulations);
+       */
+
+        //System.out.println(Rules.rf/totalSimulations);
     }
 
 /*

@@ -6,7 +6,15 @@ import java.util.*;
 
 public class Rules {
 
-    public static double statCount = 0;
+    public static double rfCount = 0;
+    public static double sfCount = 0;
+    public static double quadCount = 0;
+    public static double fhCount = 0;
+    public static double flushCount = 0;
+    public static double straightCount = 0;
+    public static double threeKindCount = 0;
+    public static double twoPairCount = 0;
+    public static double pairCount = 0;
 
     public enum PokerHand{
         High_Card,
@@ -15,6 +23,7 @@ public class Rules {
         Three_Of_A_Kind,
         Straight,
         Flush,
+        Full_House,
         Four_Of_A_Kind,
         Straight_Flush,
         Royal_Flush,
@@ -22,10 +31,38 @@ public class Rules {
     public Rules(){
 
     }
-    public static List<String> eval(Cards.Card[] pair1, Cards.Card[] pair2, Cards.Card[] fiveCards ){
-        List<String> results = new ArrayList<>();
-        getHighestHandRank(pair1, fiveCards);
-        return results;
+    public static String eval(Cards.Card[] pair1, Cards.Card[] pair2, Cards.Card[] fiveCards ){
+
+        Pair<PokerHand, Cards.Card[]> hand1 = getHighestHandRank(pair1, fiveCards);
+        Pair<PokerHand, Cards.Card[]> hand2= getHighestHandRank(pair2, fiveCards);
+        if(hand1 == null){
+            hand1 = getHighCard(pair1);
+        }
+        if(hand2 == null){
+            hand2 = getHighCard(pair2);
+        }
+        if(hand1.getKey().compareTo(hand2.getKey()) == 0){
+            return String.format("same hand [%s] implement eval later", hand1.getKey().toString());
+        }
+        if(hand1.getKey().compareTo(hand2.getKey()) > 0){
+            return String.format("Player 1 won\n" +
+                            "%s: %s\n" +
+                            "against\n" +
+                            "%s: %s" , hand1.getKey().toString(),
+                    Arrays.toString(hand1.getValue()),
+                    hand2.getKey().toString(),
+                    Arrays.toString(hand2.getValue()));
+        }
+        if(hand1.getKey().compareTo(hand2.getKey()) < 0){
+            return String.format("Player 2 won\n" +
+                            "%s: %s\n" +
+                            "against\n" +
+                            "%s: %s" , hand2.getKey().toString(),
+                    Arrays.toString(hand2.getValue()),
+                    hand1.getKey().toString(),
+                    Arrays.toString(hand1.getValue()));
+        }
+        return null;
     }
     public Cards.Card[] sameHandEval(String handType, Cards.Card[] pair1, Cards.Card[] pair2, Cards.Card[] fiveCards){
         return null;
@@ -37,35 +74,56 @@ public class Rules {
      * @return     List of string representing greatest hand produced by pair and fivecard
      * pair[0]: handType, pair[1]: highest rank
      */
-    public static List<String> getHighestHandRank(Cards.Card[] pair, Cards.Card[] fiveCards){
-        //System.out.println(PokerHand.Flush.compareTo(PokerHand.High_Card));
-        //pair.
-
+    public static Pair<PokerHand, Cards.Card[]> getHighestHandRank(Cards.Card[] pair, Cards.Card[] fiveCards){
         Cards.Card[] hand = ArrayUtils.addAll(pair, fiveCards);
         Arrays.sort(hand, Comparator.comparing(card -> card.value));
 
-        Pair<Boolean, Cards.Card[]> results = null;
-        //Pair<Boolean, Cards.Card[]> RoyalFlushResults = hasRoyalFlush(hand);
-        //Pair<Boolean, Cards.Card[]> StraightFlushResults = hasStraightFlush(hand);
-        //Pair<Boolean, Cards.Card[]> fourOfAKindResults = hasFourOfAKind(hand);
-        Pair<Boolean, Cards.Card[]> fullHouseResults = hasFullHouse(hand);
-        //Pair<Boolean, Cards.Card[]> flushResults = hasFlush(hand);
-        //Pair<Boolean, Cards.Card[]> straightResults = hasStraight(hand);
-        //Pair<Boolean, Cards.Card[]> threeOfAKindResults = hasThreeOfAKind(hand);
-        //Pair<Boolean, Cards.Card[]> twoPairResults = hasTwoPair(hand);
-        //Pair<Boolean, Cards.Card[]> pairResults = hasPair(hand);
-
-        results = fullHouseResults;
-        if(results.getKey()) {
-            System.out.println(Arrays.toString(results.getValue()));
-            statCount++;
+        Pair<Boolean, Cards.Card[]> bestHand = null;
+        bestHand = hasRoyalFlush(hand);
+        if(bestHand.getKey()){
+            rfCount++;
+            return new Pair<>(PokerHand.Royal_Flush, bestHand.getValue());
         }
-        /*
-        if(flushResults.getKey()) {
-            System.out.println(Arrays.toString(hand));
-            System.out.println(Arrays.toString(flushResults.getValue()));
+        bestHand = hasStraightFlush(hand);
+        if(bestHand.getKey()){
+            sfCount++;
+            return new Pair<>(PokerHand.Straight_Flush, bestHand.getValue());
+        }
+        bestHand = hasFourOfAKind(hand);
+        if(bestHand.getKey()){
+            quadCount++;
+            return new Pair<>(PokerHand.Four_Of_A_Kind, bestHand.getValue());
+        }
+        bestHand = hasFullHouse(hand);
+        if(bestHand.getKey()){
+            fhCount++;
+            return new Pair<>(PokerHand.Full_House, bestHand.getValue());
+        }
+        bestHand = hasFlush(hand);
+        if(bestHand.getKey()){
             flushCount++;
-        }*/
+            return new Pair<>(PokerHand.Flush, bestHand.getValue());
+        }
+        bestHand = hasStraight(hand);
+        if(bestHand.getKey()){
+            straightCount++;
+            return new Pair<>(PokerHand.Straight, bestHand.getValue());
+        }
+        bestHand = hasThreeOfAKind(hand);
+        if(bestHand.getKey()){
+            threeKindCount++;
+            return new Pair<>(PokerHand.Three_Of_A_Kind, bestHand.getValue());
+        }
+        bestHand = hasTwoPair(hand);
+        if(bestHand.getKey()){
+            twoPairCount++;
+            return new Pair<>(PokerHand.Two_Pair, bestHand.getValue());
+        }
+        bestHand = hasPair(hand);
+        if(bestHand.getKey()){
+            pairCount++;
+            return new Pair<>(PokerHand.Pair, bestHand.getValue());
+        }
         return null;
     }
     public boolean checkHands(){
@@ -253,5 +311,10 @@ public class Rules {
         }
 
         return new Pair<>(false, null);
+    }
+    public static Pair<PokerHand, Cards.Card[]> getHighCard(Cards.Card[] pair){
+        Cards.Card highCard = pair[1].value.getCardValue() > pair[0].value.getCardValue()
+                ? pair[1]: pair[0];
+        return new Pair<>(PokerHand.High_Card, new Cards.Card[]{highCard});
     }
 }

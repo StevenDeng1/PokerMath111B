@@ -20,13 +20,20 @@ public class SimulateGame {
         burn();
         Cards.Card[] river = removeCards(1);
 
-        //System.out.printf("pair1: %s%n", Arrays.toString(pair1));
-        //System.out.printf("pair2: %s%n", Arrays.toString(pair2));
+        System.out.println("~~~~~~~~~~~~~~~~~");
+        System.out.printf("player1: %s%n", Arrays.toString(pair1));
+        System.out.printf("player2: %s%n", Arrays.toString(pair2));
 
         Cards.Card[] fiveCard = merge5Cards(flop, turn, river);
+        System.out.printf("fiveCard: %s%n", Arrays.toString(fiveCard));
+        System.out.println("---------------");
+        System.out.print("Results: ");
+        System.out.println(Rules.eval(pair1, pair2, fiveCard));
+        System.out.println("~~~~~~~~~~~~~~~~~");
+        System.out.println();
 
-        //System.out.printf("fiveCard: %s%n", Arrays.toString(fiveCard));
-        Rules.getHighestHandRank(pair1, fiveCard);
+
+       // Rules.getHighestHandRank(pair1, fiveCard);
 
         //System.out.println(Rules.straightCounter);
         //System.out.printf("straight counter %.2f%n", (double) Rules.straightCounter/1000);
