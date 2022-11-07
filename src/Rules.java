@@ -42,7 +42,37 @@ public class Rules {
             hand2 = getHighCard(pair2);
         }
         if(hand1.getKey().compareTo(hand2.getKey()) == 0){
-            return String.format("same hand [%s] implement eval later", hand1.getKey().toString());
+            Pair<String, Pair<PokerHand, Cards.Card[]>> sameHandResult =
+                    sameHandEval(hand1.getKey(), hand1.getValue(), hand2.getValue());
+            if(sameHandResult.getKey().equals("hand1")){
+                return String.format("Player 1 won\n" +
+                                "%s: %s\n" +
+                                "against\n" +
+                                "%s: %s" , hand1.getKey().toString(),
+                        Arrays.toString(hand1.getValue()),
+                        hand2.getKey().toString(),
+                        Arrays.toString(hand2.getValue()));
+            }
+            if(sameHandResult.getKey().equals("hand2")){
+                return String.format("Player 2 won\n" +
+                                "%s: %s\n" +
+                                "against\n" +
+                                "%s: %s" , hand2.getKey().toString(),
+                        Arrays.toString(hand2.getValue()),
+                        hand1.getKey().toString(),
+                        Arrays.toString(hand1.getValue()));
+            }
+            if(sameHandResult.getKey().equals("draw")){
+                return String.format("Draw\n" +
+                                "%s: %s\n" +
+                                "against\n" +
+                                "%s: %s" , hand2.getKey().toString(),
+                        Arrays.toString(hand2.getValue()),
+                        hand1.getKey().toString(),
+                        Arrays.toString(hand1.getValue()));
+            }
+
+            //return String.format("same hand [%s] implement eval later", hand1.getKey().toString());
         }
         if(hand1.getKey().compareTo(hand2.getKey()) > 0){
             return String.format("Player 1 won\n" +
@@ -64,8 +94,175 @@ public class Rules {
         }
         return null;
     }
-    public Cards.Card[] sameHandEval(String handType, Cards.Card[] pair1, Cards.Card[] pair2, Cards.Card[] fiveCards){
-        return null;
+    public static Pair<String, Pair<PokerHand, Cards.Card[]>> sameHandEval(PokerHand handType,
+                                                                           Cards.Card[] hand1, Cards.Card[] hand2){
+        Pair<String, Pair<PokerHand, Cards.Card[]>> hand1Winner = new Pair<>("hand1", new Pair<>(handType, hand1));
+        Pair<String, Pair<PokerHand, Cards.Card[]>> hand2Winner = new Pair<>("hand2", new Pair<>(handType, hand2));
+        Pair<String, Pair<PokerHand, Cards.Card[]>> drawWinner = new Pair<>("draw", new Pair<>(handType, hand1));
+
+        Pair<String, Pair<PokerHand, Cards.Card[]>> winner = null;
+        if(handType.equals(PokerHand.Royal_Flush)){
+            winner = drawWinner;
+        }
+        if(handType.equals(PokerHand.Straight_Flush)){
+            int highestRankHand1Value = 0;
+            for(Cards.Card card : hand1){
+                highestRankHand1Value = Math.max(card.value.getCardValue(), highestRankHand1Value);
+            }
+            int highestRankHand2Value = 0;
+            for(Cards.Card card : hand2){
+                highestRankHand2Value = Math.max(card.value.getCardValue(), highestRankHand2Value);
+            }
+            if(highestRankHand1Value > highestRankHand2Value){
+                winner = hand1Winner;
+            } if(highestRankHand1Value < highestRankHand2Value){
+                winner = hand2Winner;
+            } if(highestRankHand1Value == highestRankHand2Value){
+                winner = drawWinner;
+            }
+        }
+        if(handType.equals(PokerHand.Four_Of_A_Kind)){
+            if(hand1[0].value.getCardValue() > hand2[0].value.getCardValue()){
+                winner = hand1Winner;
+            } if((hand1[0].value.getCardValue() < hand2[0].value.getCardValue())){
+                winner = hand2Winner;
+            }
+            if((hand1[0].value.getCardValue() == hand2[0].value.getCardValue())){
+                winner = drawWinner;
+            }
+        }
+        if(handType.equals(PokerHand.Full_House)){
+            int hand1TripleValue = 0;
+            int hand1DoubleValue = 0;
+            Map<Integer, Integer> rankCount = new HashMap<>();
+            for(int i=0; i<hand1.length-3; i++){ //process the 3 and 2
+                rankCount.put(hand1[i].value.getCardValue(),
+                        rankCount.getOrDefault(hand1[i].value.getCardValue(),0)+1);
+            }
+            for(Map.Entry<Integer,Integer> cardRankCount : rankCount.entrySet()){
+                if(cardRankCount.getValue() == 3){
+                    hand1TripleValue = cardRankCount.getKey();
+                }
+                if(cardRankCount.getValue() == 2){
+                    hand1DoubleValue = cardRankCount.getKey();
+                }
+            }
+            int hand2TripleValue = 0;
+            int hand2DoubleValue = 0;
+            rankCount = new HashMap<>();
+            for(int i=0; i<hand1.length-3; i++){ //process the 3 and 2
+                rankCount.put(hand1[i].value.getCardValue(),
+                        rankCount.getOrDefault(hand1[i].value.getCardValue(),0)+1);
+            }
+            for(Map.Entry<Integer,Integer> cardRankCount : rankCount.entrySet()){
+                if(cardRankCount.getValue() == 3){
+                    hand2TripleValue = cardRankCount.getKey();
+                }
+                if(cardRankCount.getValue() == 2){
+                    hand2DoubleValue = cardRankCount.getKey();
+                }
+            }
+            if(hand1TripleValue > hand2TripleValue){
+                winner = hand1Winner;
+            } if(hand1TripleValue < hand2TripleValue){
+                winner = hand2Winner;
+            } if(hand1TripleValue == hand2TripleValue){
+                if(hand1DoubleValue > hand2DoubleValue){
+                    winner = hand1Winner;
+                }
+                if(hand1DoubleValue < hand2DoubleValue){
+                    winner = hand2Winner;
+                }
+                if(hand1DoubleValue == hand2DoubleValue) {
+                    winner = drawWinner;
+                }
+            }
+
+        }
+        if(handType.equals(PokerHand.Flush)){
+            int highestRankHand1Value = 0;
+            for(Cards.Card card : hand1){
+                highestRankHand1Value = Math.max(card.value.getCardValue(), highestRankHand1Value);
+            }
+            int highestRankHand2Value = 0;
+            for(Cards.Card card : hand2){
+                highestRankHand2Value = Math.max(card.value.getCardValue(), highestRankHand2Value);
+            }
+            if(highestRankHand1Value > highestRankHand2Value){
+                winner = hand1Winner;
+            } if(highestRankHand1Value < highestRankHand2Value){
+                winner = hand2Winner;
+            } if(highestRankHand1Value == highestRankHand2Value){
+                winner = drawWinner;
+            }
+        }
+        if(handType.equals(PokerHand.Straight)){
+            int highestRankHand1Value = 0;
+            for(Cards.Card card : hand1){
+                highestRankHand1Value = Math.max(card.value.getCardValue(), highestRankHand1Value);
+            }
+            int highestRankHand2Value = 0;
+            for(Cards.Card card : hand2){
+                highestRankHand2Value = Math.max(card.value.getCardValue(), highestRankHand2Value);
+            }
+            if(highestRankHand1Value > highestRankHand2Value){
+                winner = hand1Winner;
+            } if(highestRankHand1Value < highestRankHand2Value){
+                winner = hand2Winner;
+            } if(highestRankHand1Value == highestRankHand2Value){
+                winner = drawWinner;
+            }
+        }
+        if(handType.equals(PokerHand.Three_Of_A_Kind)){
+            if(hand1[0].value.getCardValue() > hand2[0].value.getCardValue()){
+                winner = hand1Winner;
+            } if((hand1[0].value.getCardValue() < hand2[0].value.getCardValue())){
+                winner = hand2Winner;
+            } if((hand1[0].value.getCardValue() == hand2[0].value.getCardValue())){
+                winner = drawWinner;
+            }
+        }
+        if(handType.equals(PokerHand.Two_Pair)){
+            int highestRankHand1Value = 0;
+            for(Cards.Card card : hand1){
+                highestRankHand1Value = Math.max(card.value.getCardValue(), highestRankHand1Value);
+            }
+            int highestRankHand2Value = 0;
+            for(Cards.Card card : hand2){
+                highestRankHand2Value = Math.max(card.value.getCardValue(), highestRankHand2Value);
+            }
+            if(highestRankHand1Value > highestRankHand2Value){
+                winner = hand1Winner;
+            } if(highestRankHand1Value < highestRankHand2Value){
+                winner = hand2Winner;
+            } if(highestRankHand1Value == highestRankHand2Value){
+                winner = drawWinner;
+            }
+        }
+        if(handType.equals(PokerHand.Pair)){
+            if(hand1[0].value.getCardValue() > hand2[0].value.getCardValue()){
+                winner = hand1Winner;
+            } if((hand1[0].value.getCardValue() < hand2[0].value.getCardValue())){
+                winner = hand2Winner;
+            }
+            if((hand1[0].value.getCardValue() == hand2[0].value.getCardValue())){
+                winner = drawWinner;
+            }
+        }
+        if(handType.equals(PokerHand.High_Card)){
+            if(hand1[0].value.getCardValue() > hand2[0].value.getCardValue()){
+                winner = hand1Winner;
+            } else if((hand1[0].value.getCardValue() < hand2[0].value.getCardValue())){
+                winner = hand2Winner;
+            } else if(hand1[1].value.getCardValue() > hand2[1].value.getCardValue()){
+                winner = hand1Winner;
+            } else if(hand1[1].value.getCardValue() < hand2[1].value.getCardValue()){
+                winner = hand2Winner;
+            } else {
+                winner = drawWinner;
+            }
+        }
+        return winner;
     }
     /**
      * gets the highest hand possible of a pair and fiveCard as well as the hand
@@ -315,6 +512,8 @@ public class Rules {
     public static Pair<PokerHand, Cards.Card[]> getHighCard(Cards.Card[] pair){
         Cards.Card highCard = pair[1].value.getCardValue() > pair[0].value.getCardValue()
                 ? pair[1]: pair[0];
-        return new Pair<>(PokerHand.High_Card, new Cards.Card[]{highCard});
+        Cards.Card lowCard = pair[1].value.getCardValue() < pair[0].value.getCardValue()
+                ? pair[1]: pair[0];
+        return new Pair<>(PokerHand.High_Card, new Cards.Card[]{highCard, lowCard});
     }
 }
