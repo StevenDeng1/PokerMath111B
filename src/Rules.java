@@ -71,8 +71,36 @@ public class Rules {
                         hand1.getKey().toString(),
                         Arrays.toString(hand1.getValue()));
             }
-
-            //return String.format("same hand [%s] implement eval later", hand1.getKey().toString());
+            if(sameHandResult.getKey().equals("kickerDecide")){
+                String kickerResult = kickerDecider(pair1, pair2);
+                if(kickerResult.equals("pair1")){
+                    return String.format("Player 1 won\n" +
+                                    "%s: %s\n" +
+                                    "against\n" +
+                                    "%s: %s" , hand1.getKey().toString(),
+                            Arrays.toString(hand1.getValue()),
+                            hand2.getKey().toString(),
+                            Arrays.toString(hand2.getValue()));
+                }
+                if(kickerResult.equals("pair2")){
+                    return String.format("Player 2 won\n" +
+                                    "%s: %s\n" +
+                                    "against\n" +
+                                    "%s: %s" , hand2.getKey().toString(),
+                            Arrays.toString(hand2.getValue()),
+                            hand1.getKey().toString(),
+                            Arrays.toString(hand1.getValue()));
+                }
+                if(kickerResult.equals("draw")){
+                    return String.format("Draw\n" +
+                                    "%s: %s\n" +
+                                    "against\n" +
+                                    "%s: %s" , hand2.getKey().toString(),
+                            Arrays.toString(hand2.getValue()),
+                            hand1.getKey().toString(),
+                            Arrays.toString(hand1.getValue()));
+                }
+            }
         }
         if(hand1.getKey().compareTo(hand2.getKey()) > 0){
             return String.format("Player 1 won\n" +
@@ -99,6 +127,7 @@ public class Rules {
         Pair<String, Pair<PokerHand, Cards.Card[]>> hand1Winner = new Pair<>("hand1", new Pair<>(handType, hand1));
         Pair<String, Pair<PokerHand, Cards.Card[]>> hand2Winner = new Pair<>("hand2", new Pair<>(handType, hand2));
         Pair<String, Pair<PokerHand, Cards.Card[]>> drawWinner = new Pair<>("draw", new Pair<>(handType, hand1));
+        Pair<String, Pair<PokerHand, Cards.Card[]>> kickerWinner = new Pair<>("kickerDecide", new Pair<>(handType, hand1));
 
         Pair<String, Pair<PokerHand, Cards.Card[]>> winner = null;
         if(handType.equals(PokerHand.Royal_Flush)){
@@ -118,7 +147,7 @@ public class Rules {
             } if(highestRankHand1Value < highestRankHand2Value){
                 winner = hand2Winner;
             } if(highestRankHand1Value == highestRankHand2Value){
-                winner = drawWinner;
+                winner = kickerWinner;
             }
         }
         if(handType.equals(PokerHand.Four_Of_A_Kind)){
@@ -128,7 +157,7 @@ public class Rules {
                 winner = hand2Winner;
             }
             if((hand1[0].value.getCardValue() == hand2[0].value.getCardValue())){
-                winner = drawWinner;
+                winner = kickerWinner;
             }
         }
         if(handType.equals(PokerHand.Full_House)){
@@ -174,7 +203,7 @@ public class Rules {
                     winner = hand2Winner;
                 }
                 if(hand1DoubleValue == hand2DoubleValue) {
-                    winner = drawWinner;
+                    winner = kickerWinner;
                 }
             }
 
@@ -193,7 +222,7 @@ public class Rules {
             } if(highestRankHand1Value < highestRankHand2Value){
                 winner = hand2Winner;
             } if(highestRankHand1Value == highestRankHand2Value){
-                winner = drawWinner;
+                winner = kickerWinner;
             }
         }
         if(handType.equals(PokerHand.Straight)){
@@ -210,7 +239,7 @@ public class Rules {
             } if(highestRankHand1Value < highestRankHand2Value){
                 winner = hand2Winner;
             } if(highestRankHand1Value == highestRankHand2Value){
-                winner = drawWinner;
+                winner = kickerWinner;
             }
         }
         if(handType.equals(PokerHand.Three_Of_A_Kind)){
@@ -236,7 +265,7 @@ public class Rules {
             } if(highestRankHand1Value < highestRankHand2Value){
                 winner = hand2Winner;
             } if(highestRankHand1Value == highestRankHand2Value){
-                winner = drawWinner;
+                winner = kickerWinner;
             }
         }
         if(handType.equals(PokerHand.Pair)){
@@ -246,7 +275,7 @@ public class Rules {
                 winner = hand2Winner;
             }
             if((hand1[0].value.getCardValue() == hand2[0].value.getCardValue())){
-                winner = drawWinner;
+                winner = kickerWinner;
             }
         }
         if(handType.equals(PokerHand.High_Card)){
@@ -259,7 +288,7 @@ public class Rules {
             } else if(hand1[1].value.getCardValue() < hand2[1].value.getCardValue()){
                 winner = hand2Winner;
             } else {
-                winner = drawWinner;
+                winner = kickerWinner;
             }
         }
         return winner;
@@ -515,5 +544,22 @@ public class Rules {
         Cards.Card lowCard = pair[1].value.getCardValue() < pair[0].value.getCardValue()
                 ? pair[1]: pair[0];
         return new Pair<>(PokerHand.High_Card, new Cards.Card[]{highCard, lowCard});
+    }
+    public static String kickerDecider(Cards.Card[] pair1, Cards.Card[] pair2){
+        pair1 = getHighCard(pair1).getValue();
+        pair2 = getHighCard(pair2).getValue();
+        if(pair1[0].value.getCardValue() > pair2[0].value.getCardValue()){
+            return "pair1";
+        }
+        if(pair2[0].value.getCardValue() > pair1[0].value.getCardValue()){
+            return "pair2";
+        }
+        if(pair1[1].value.getCardValue() > pair2[1].value.getCardValue()){
+            return "pair1";
+        }
+        if(pair2[1].value.getCardValue() > pair1[1].value.getCardValue()){
+            return "pair2";
+        }
+        return "draw";
     }
 }
