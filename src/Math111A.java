@@ -1,17 +1,51 @@
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class Math111A {
+
+    public static Player.PlayStyle [] ourPlayStyles = {
+            Player.PlayStyle.Aggressive,
+            Player.PlayStyle.Normal,
+            Player.PlayStyle.Cautious,
+    };
+    public static Player.PlayStyle [] enemyPlayStyles = {
+            Player.PlayStyle.Normal
+    };
 
     public static void main(String[] args) {
         Cards cards = new Cards();
         List<Cards.Card> deck = cards.deck;
         SimulateGame game = new SimulateGame(deck);
-        int totalSimulations = 20;
-        for (int i = 0; i <= totalSimulations; i++) {
-            game.play();
+        int totalSimulations = 10000;
+        int totalHands = 100;
+        Map<Player.PlayStyle, Integer> winningsInTotalSimulations = new HashMap<>(Map.of(
+                Player.PlayStyle.Aggressive, 0,
+                Player.PlayStyle.Normal, 0,
+                Player.PlayStyle.Cautious, 0));
+
+        long startTime = System.nanoTime();
+
+        for(Player.PlayStyle ourPlayStyle : ourPlayStyles) {
+            for(int i =0; i<totalSimulations; i++) { //10000 simulations of 100 hands
+                int amountWon = game.play(totalHands, ourPlayStyle, Player.PlayStyle.Normal);
+                game = new SimulateGame(deck);
+                winningsInTotalSimulations.put(ourPlayStyle,
+                        Math.max(amountWon, winningsInTotalSimulations.get(ourPlayStyle)));
+            }
+            System.out.println(String.format("%s done",ourPlayStyle));
         }
+
+        System.out.println();
+        for(Map.Entry<Player.PlayStyle, Integer> playStyleIntegerEntry: winningsInTotalSimulations.entrySet()){
+            System.out.println(playStyleIntegerEntry);
+        }
+
+        long endTime = System.nanoTime();
+        long duration = (endTime - startTime)/1000000;  //divide by 1000000 to get milliseconds.
+        long durationInSeconds = duration/1000;
+
+        System.out.println();
+        System.out.println(String.format("time it took %d", durationInSeconds));
+
 
         /* // Calculates odds all acccurate
         System.out.printf("Royal Flush: %4f%n", Rules.rfCount/totalSimulations);

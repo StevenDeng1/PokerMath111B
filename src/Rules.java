@@ -1,6 +1,7 @@
 
 import javafx.util.Pair;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 
@@ -28,10 +29,27 @@ public class Rules {
         Straight_Flush,
         Royal_Flush,
     }
+
+    public enum Round{
+        Pre_Flop(1),
+        Flop(2),
+        Turn(3),
+        River(4);
+        int roundNumber;
+        Round(int i) {
+            roundNumber = i;
+        }
+        public int getRoundNumber() {
+            return roundNumber;
+        }
+    }
+
+    public static Set<Pair<String,Boolean>> bestPreFlop = fillBestPreFlopMatrix();
     public Rules(){
 
     }
-    public static String eval(Cards.Card[] pair1, Cards.Card[] pair2, Cards.Card[] fiveCards ){
+
+    public static Pair<SimulateGame.GameOutcome, Pair<Pair<PokerHand, Cards.Card[]>, Pair<PokerHand, Cards.Card[]>>> eval(Cards.Card[] pair1, Cards.Card[] pair2, Cards.Card[] fiveCards ){
 
         Pair<PokerHand, Cards.Card[]> hand1 = getHighestHandRank(pair1, fiveCards);
         Pair<PokerHand, Cards.Card[]> hand2= getHighestHandRank(pair2, fiveCards);
@@ -45,80 +63,96 @@ public class Rules {
             Pair<String, Pair<PokerHand, Cards.Card[]>> sameHandResult =
                     sameHandEval(hand1.getKey(), hand1.getValue(), hand2.getValue());
             if(sameHandResult.getKey().equals("hand1")){
+                return new Pair(SimulateGame.GameOutcome.Player_1_Win, new Pair(hand1, hand2));
+                /*
                 return String.format("Player 1 won\n" +
                                 "%s: %s\n" +
                                 "against\n" +
                                 "%s: %s" , hand1.getKey().toString(),
                         Arrays.toString(hand1.getValue()),
                         hand2.getKey().toString(),
-                        Arrays.toString(hand2.getValue()));
+                        Arrays.toString(hand2.getValue()));*/
             }
             if(sameHandResult.getKey().equals("hand2")){
+                return new Pair(SimulateGame.GameOutcome.Player_2_Win, new Pair(hand2, hand1));
+                /*
                 return String.format("Player 2 won\n" +
                                 "%s: %s\n" +
                                 "against\n" +
                                 "%s: %s" , hand2.getKey().toString(),
                         Arrays.toString(hand2.getValue()),
                         hand1.getKey().toString(),
-                        Arrays.toString(hand1.getValue()));
+                        Arrays.toString(hand1.getValue()));*/
             }
             if(sameHandResult.getKey().equals("draw")){
+                return new Pair(SimulateGame.GameOutcome.Draw, new Pair(hand1, hand2));
+                /*
                 return String.format("Draw\n" +
                                 "%s: %s\n" +
                                 "against\n" +
                                 "%s: %s" , hand2.getKey().toString(),
                         Arrays.toString(hand2.getValue()),
                         hand1.getKey().toString(),
-                        Arrays.toString(hand1.getValue()));
+                        Arrays.toString(hand1.getValue()));*/
             }
             if(sameHandResult.getKey().equals("kickerDecide")){
                 String kickerResult = kickerDecider(pair1, pair2);
                 if(kickerResult.equals("pair1")){
+                    return new Pair(SimulateGame.GameOutcome.Player_1_Win, new Pair(hand1, hand2));
+                    /*
                     return String.format("Player 1 won\n" +
                                     "%s: %s\n" +
                                     "against\n" +
                                     "%s: %s" , hand1.getKey().toString(),
                             Arrays.toString(hand1.getValue()),
                             hand2.getKey().toString(),
-                            Arrays.toString(hand2.getValue()));
+                            Arrays.toString(hand2.getValue()));*/
                 }
                 if(kickerResult.equals("pair2")){
+                    return new Pair(SimulateGame.GameOutcome.Player_2_Win, new Pair(hand2, hand1));
+                    /*
                     return String.format("Player 2 won\n" +
                                     "%s: %s\n" +
                                     "against\n" +
                                     "%s: %s" , hand2.getKey().toString(),
                             Arrays.toString(hand2.getValue()),
                             hand1.getKey().toString(),
-                            Arrays.toString(hand1.getValue()));
+                            Arrays.toString(hand1.getValue()));*/
                 }
                 if(kickerResult.equals("draw")){
+                    return new Pair(SimulateGame.GameOutcome.Draw, new Pair(hand1, hand2));
+                    /*
                     return String.format("Draw\n" +
                                     "%s: %s\n" +
                                     "against\n" +
                                     "%s: %s" , hand2.getKey().toString(),
                             Arrays.toString(hand2.getValue()),
                             hand1.getKey().toString(),
-                            Arrays.toString(hand1.getValue()));
+                            Arrays.toString(hand1.getValue()));*/
                 }
             }
         }
         if(hand1.getKey().compareTo(hand2.getKey()) > 0){
+            return new Pair(SimulateGame.GameOutcome.Player_1_Win, new Pair(hand1, hand2));
+            /*
             return String.format("Player 1 won\n" +
                             "%s: %s\n" +
                             "against\n" +
                             "%s: %s" , hand1.getKey().toString(),
                     Arrays.toString(hand1.getValue()),
                     hand2.getKey().toString(),
-                    Arrays.toString(hand2.getValue()));
+                    Arrays.toString(hand2.getValue()));*/
         }
         if(hand1.getKey().compareTo(hand2.getKey()) < 0){
+            return new Pair(SimulateGame.GameOutcome.Player_2_Win, new Pair(hand2, hand1));
+            /*
             return String.format("Player 2 won\n" +
                             "%s: %s\n" +
                             "against\n" +
                             "%s: %s" , hand2.getKey().toString(),
                     Arrays.toString(hand2.getValue()),
                     hand1.getKey().toString(),
-                    Arrays.toString(hand1.getValue()));
+                    Arrays.toString(hand1.getValue()));*/
         }
         return null;
     }
@@ -350,7 +384,7 @@ public class Rules {
             pairCount++;
             return new Pair<>(PokerHand.Pair, bestHand.getValue());
         }
-        return null;
+        return new Pair(PokerHand.High_Card, getHighCard(pair).getValue());
     }
     public boolean checkHands(){
         return false;
@@ -561,5 +595,94 @@ public class Rules {
             return "pair2";
         }
         return "draw";
+    }
+
+//can modify code to return after any 5 card rather than looking for highest 5 card
+    public static boolean oneCardAwayFromFiveCard(Cards.Card[] pair, Cards.Card[] hand){
+        Set<Cards.Card> inHand = new HashSet<>();
+        for(Cards.Card card : hand){
+            inHand.add(card);
+        }
+        PokerHand closestHighestHandRank = PokerHand.High_Card;
+        Cards.Card [] addCardToHand = new Cards.Card[hand.length+1];
+        System.arraycopy(hand, 0, addCardToHand, 0, hand.length);
+        for(Cards.Card card  : new Cards().deck){
+            if(!inHand.contains(card)){
+                addCardToHand[hand.length] = card;
+                PokerHand currHighestCardRank = getHighestHandRank(pair, addCardToHand).getKey();
+                closestHighestHandRank = closestHighestHandRank.compareTo(currHighestCardRank) > 0 ?
+                        closestHighestHandRank : currHighestCardRank;
+                }
+            }
+        if(closestHighestHandRank.compareTo(PokerHand.Straight) >=0){
+            return true;
+        }
+        return false;
+    }
+    public static int getPairRelativeRanking(Cards.Card[] pair, Cards.Card[] cardsOut){
+        int card1 = pair[0].value.getCardValue();
+        int card2 = pair[0].value.getCardValue();
+        int card1Pos = -1;
+        int card2Pos = -1;
+        Cards.Card[] hand = ArrayUtils.addAll(pair, cardsOut);
+        Arrays.sort(hand, Comparator.comparing(card -> card.value));
+        for(int i=0; i<hand.length; i++){
+            Cards.Card card = hand[i];
+            if(card1Pos != -1 && card2Pos != -1){
+                break;
+            }
+            if(card1 == card.value.getCardValue()){
+                card1Pos = i;
+            }
+            if(card2 == card.value.getCardValue()){
+                card2Pos = i;
+            }
+        }
+        return hand.length-Math.max(card1Pos,card2Pos);
+
+    }
+    public static Set<Pair<String,Boolean>> fillBestPreFlopMatrix(){
+        Set<Pair<String,Boolean>> bestPreFlopMatrix = new HashSet<>();
+        bestPreFlopMatrix.add(new Pair<>("AA", false));
+        bestPreFlopMatrix.add(new Pair<>("AK", true));
+        bestPreFlopMatrix.add(new Pair<>("AQ", true));
+        bestPreFlopMatrix.add(new Pair<>("AJ", true));
+        bestPreFlopMatrix.add(new Pair<>("A10", true));
+        bestPreFlopMatrix.add(new Pair<>("A9", true));
+        bestPreFlopMatrix.add(new Pair<>("A8", true));
+        bestPreFlopMatrix.add(new Pair<>("A7", true));
+        bestPreFlopMatrix.add(new Pair<>("A6", true));
+        bestPreFlopMatrix.add(new Pair<>("A5", true));
+        bestPreFlopMatrix.add(new Pair<>("A4", true));
+        bestPreFlopMatrix.add(new Pair<>("A3", true));
+        bestPreFlopMatrix.add(new Pair<>("A2", true));
+        bestPreFlopMatrix.add(new Pair<>("AK", false));
+        bestPreFlopMatrix.add(new Pair<>("KK", false));
+        bestPreFlopMatrix.add(new Pair<>("KQ", true));
+        bestPreFlopMatrix.add(new Pair<>("KJ", true));
+        bestPreFlopMatrix.add(new Pair<>("K10", true));
+        bestPreFlopMatrix.add(new Pair<>("K9", true));
+        bestPreFlopMatrix.add(new Pair<>("AQ", true));
+        bestPreFlopMatrix.add(new Pair<>("KQ", false));
+        bestPreFlopMatrix.add(new Pair<>("QQ", false));
+        bestPreFlopMatrix.add(new Pair<>("QJ", true));
+        bestPreFlopMatrix.add(new Pair<>("Q10", true));
+        bestPreFlopMatrix.add(new Pair<>("Q9", true));
+        bestPreFlopMatrix.add(new Pair<>("AJ", false));
+        bestPreFlopMatrix.add(new Pair<>("JJ", false));
+        bestPreFlopMatrix.add(new Pair<>("J10", true));
+        bestPreFlopMatrix.add(new Pair<>("A10", false));
+        bestPreFlopMatrix.add(new Pair<>("1010", false));
+        bestPreFlopMatrix.add(new Pair<>("109", true));
+        bestPreFlopMatrix.add(new Pair<>("99", false));
+        bestPreFlopMatrix.add(new Pair<>("98", true));
+        bestPreFlopMatrix.add(new Pair<>("88", false));
+        bestPreFlopMatrix.add(new Pair<>("77", false));
+        bestPreFlopMatrix.add(new Pair<>("66", false));
+        bestPreFlopMatrix.add(new Pair<>("55", false));
+        bestPreFlopMatrix.add(new Pair<>("44", false));
+        bestPreFlopMatrix.add(new Pair<>("33", false));
+        bestPreFlopMatrix.add(new Pair<>("22", false));
+        return bestPreFlopMatrix;
     }
 }

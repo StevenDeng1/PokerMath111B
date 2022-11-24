@@ -45,7 +45,7 @@ public class Cards {
     public List<Card> deck;
 
     //private String[] values = {"2","3","4","5","6","7","8","9","10","J","Q","K","A"};
-    private final Character [] suits = {'\u2666','\u2663','\u2665','\u2660'}; //d,c,h,s
+    public static final Character [] suits = {'\u2666','\u2663','\u2665','\u2660'}; //d,c,h,s
 
     public Cards(){
         deck = new ArrayList<Card>(52);
