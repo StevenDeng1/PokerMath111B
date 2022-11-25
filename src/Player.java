@@ -1,5 +1,4 @@
 import javafx.util.Pair;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
 
@@ -195,7 +194,7 @@ public class Player {
                         return raise((int) Math.ceil((double) round.getRoundNumber() / 4 * potSize));
                     }
                     case possibleFiveCard -> {
-                        return raise((int) Math.ceil( 1.5* bigBlind * potSize /52.0)); //change odds later
+                        return raise((int) Math.ceil( 1.5* bigBlind * potSize * getClosestHandProb(bestHand)));
                     }
                     case pairDoubleOrThreeCard -> {
                         return raise((int) Math.ceil((double) bigBlind /  2));
@@ -211,7 +210,7 @@ public class Player {
                         return raise((int) (round.getRoundNumber() / 4.0 * potSize));
                     }
                     case possibleFiveCard -> {
-                        return raise((int) (bigBlind * Math.ceil(potSize * 1 / 52.0)));
+                        return raise((int) (bigBlind * Math.ceil(potSize * getClosestHandProb(bestHand))));
                     }
                     case pairDoubleOrThreeCard -> {
                         return raise(bigBlind * Rules.getPairRelativeRanking(pair, cardsOut));
@@ -227,7 +226,7 @@ public class Player {
                         return raise((int) (round.getRoundNumber() / 4.0 * potSize));
                     }
                     case possibleFiveCard -> {
-                        return raise((int) (.8*bigBlind * Math.ceil(potSize * 1 / 52.0)));
+                        return raise((int) (.6*bigBlind * Math.ceil(potSize * getClosestHandProb(bestHand))));
                     }
                     case pairDoubleOrThreeCard -> {
                         return raise(bigBlind * Rules.getPairRelativeRanking(pair, cardsOut));
@@ -240,13 +239,27 @@ public class Player {
         }
         return null;
     }
+
+    private double getClosestHandProb(Pair<Rules.PokerHand,Cards.Card[]> bestHand) {
+        if(bestHand.getKey().equals(Rules.PokerHand.Straight)){
+            return (1.0/13);
+        }
+        if(bestHand.getKey().equals(Rules.PokerHand.Flush)){
+            return 9.0/52;
+        }
+        if(bestHand.getKey().equals(Rules.PokerHand.Full_House)){
+            return 1.0/26;
+        }
+        return 1.0/52;
+    }
+
     public Pair<CurrHandEnum, Pair<Rules.PokerHand, Cards.Card[]>> evalPairWithCardsOut(Cards.Card[] cardsOut){
         Pair<Rules.PokerHand, Cards.Card[]> currHighestHand = Rules.getHighestHandRank(pair, cardsOut);
         if(currHighestHand.getKey().compareTo(Rules.PokerHand.Straight) >= 0){
             return new Pair<>(CurrHandEnum.fiveCard, currHighestHand);
         } else if(Rules.oneCardAwayFromFiveCard(pair, cardsOut)){
-           // System.out.println(String.format("One card away from 5 card with pair:{%s},\n" +
-                         //   "5 card: {%s}", Arrays.toString(pair), Arrays.toString(cardsOut)));
+           //System.out.println(String.format("One card away from 5 card with pair:{%s},\n" +
+                          //"cards out: {%s}", Arrays.toString(pair), Arrays.toString(cardsOut)));
             return new Pair<>(CurrHandEnum.possibleFiveCard, currHighestHand);
         } else if (currHighestHand.getKey().compareTo(Rules.PokerHand.High_Card) > 0){
             return new Pair<>(CurrHandEnum.pairDoubleOrThreeCard, currHighestHand);

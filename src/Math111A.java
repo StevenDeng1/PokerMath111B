@@ -15,12 +15,18 @@ public class Math111A {
         Cards cards = new Cards();
         List<Cards.Card> deck = cards.deck;
         SimulateGame game = new SimulateGame(deck);
-        int totalSimulations = 10000;
-        int totalHands = 100;
-        Map<Player.PlayStyle, Integer> winningsInTotalSimulations = new HashMap<>(Map.of(
+        int totalSimulations = 5;
+        int totalHands = 10;
+        Map<Player.PlayStyle, Integer> maxWinningsInTotalSimulations = new HashMap<>(Map.of(
                 Player.PlayStyle.Aggressive, 0,
                 Player.PlayStyle.Normal, 0,
                 Player.PlayStyle.Cautious, 0));
+
+        Map<Player.PlayStyle, Integer> averageWinningsInTotalSimulations = new HashMap<>(Map.of(
+                Player.PlayStyle.Aggressive, 0,
+                Player.PlayStyle.Normal, 0,
+                Player.PlayStyle.Cautious, 0));
+
 
         long startTime = System.nanoTime();
 
@@ -28,23 +34,35 @@ public class Math111A {
             for(int i =0; i<totalSimulations; i++) { //10000 simulations of 100 hands
                 int amountWon = game.play(totalHands, ourPlayStyle, Player.PlayStyle.Normal);
                 game = new SimulateGame(deck);
-                winningsInTotalSimulations.put(ourPlayStyle,
-                        Math.max(amountWon, winningsInTotalSimulations.get(ourPlayStyle)));
+                maxWinningsInTotalSimulations.put(ourPlayStyle,
+                        Math.max(amountWon, maxWinningsInTotalSimulations.get(ourPlayStyle)));
+                averageWinningsInTotalSimulations.put(ourPlayStyle,
+                        averageWinningsInTotalSimulations.getOrDefault(ourPlayStyle, 0)+amountWon);
             }
             System.out.println(String.format("%s done",ourPlayStyle));
         }
 
         System.out.println();
-        for(Map.Entry<Player.PlayStyle, Integer> playStyleIntegerEntry: winningsInTotalSimulations.entrySet()){
+
+        System.out.println(String.format("Max winnings in %d simulations of %d hands:", totalSimulations, totalHands));
+        for(Map.Entry<Player.PlayStyle, Integer> playStyleIntegerEntry: maxWinningsInTotalSimulations.entrySet()){
             System.out.println(playStyleIntegerEntry);
         }
+
+        System.out.println();
+        System.out.println(String.format("Average winnings in %d simulations of %d hands:", totalSimulations, totalHands));
+        for(Map.Entry<Player.PlayStyle, Integer> averageWinningsEntry: averageWinningsInTotalSimulations.entrySet()){
+            System.out.println(String.format("%s=%d",averageWinningsEntry.getKey(), averageWinningsEntry.getValue()/totalSimulations));
+        }
+
+
 
         long endTime = System.nanoTime();
         long duration = (endTime - startTime)/1000000;  //divide by 1000000 to get milliseconds.
         long durationInSeconds = duration/1000;
 
         System.out.println();
-        System.out.println(String.format("time it took %d", durationInSeconds));
+        System.out.println(String.format("time it took %d seconds", durationInSeconds));
 
 
         /* // Calculates odds all acccurate
