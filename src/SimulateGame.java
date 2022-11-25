@@ -61,7 +61,7 @@ public class SimulateGame {
 
             }
             if(rotationNum%2 == 1){
-                System.out.println(String.format("small blind: our player, big bLind: enemy player"));
+                System.out.println(String.format("small blind: enemy player, big bLind: our player"));
             }
 
             System.out.println();

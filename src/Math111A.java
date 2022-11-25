@@ -15,8 +15,11 @@ public class Math111A {
         Cards cards = new Cards();
         List<Cards.Card> deck = cards.deck;
         SimulateGame game = new SimulateGame(deck);
-        int totalSimulations = 5;
-        int totalHands = 10;
+        Scanner inputScanner = new Scanner(System.in);
+        System.out.print("Enter number of simulations: ");
+        int totalSimulations = inputScanner.nextInt();
+        System.out.print("Enter number of hands: ");
+        int totalHands = inputScanner.nextInt();
         Map<Player.PlayStyle, Integer> maxWinningsInTotalSimulations = new HashMap<>(Map.of(
                 Player.PlayStyle.Aggressive, 0,
                 Player.PlayStyle.Normal, 0,
