@@ -1,11 +1,11 @@
-Optimizing Single Hand Poker Strategy
+# Optimizing Single Hand Poker Strategy
 
 The following code is for Math 111A. The project attempts to create a model 
 to optimize winnings over three poker strategies in a head-to-head game of Texas HoldEm. 
 
 The following describes the three poker strategies.
 
-Aggressive:
+## Aggressive:
 In our aggressive play-style strategy we will use the following rules to dictate how one plays. Preflop our player will play with any cards. At flop/turn/river we will play based on the following rules:
 – If a 5 card hand (straight, flush, etc) is present raise:
 round/4 ∗ pot size (1)
@@ -16,7 +16,7 @@ big blind ∗ [1/(# of pairs ≥ pair)] (3)
 – If player has nothing raise big blind amount
 
 
-Normal:
+## Normal:
 In our normal play-style strategy we will play only cards within the matrix
 in the blue at pre-flop. At flop/turn/river we will play based on the following rules:
 – If a 5 card hand (straight, flush, etc) is present raise:
@@ -29,7 +29,7 @@ big blind ∗ [1/(# of pairs ≥ pair)] (6)
 – If other player raises, player will fold if they have nothing and call only if they are close to a 5 card have a 5 card or have a high pair/triplet/2 pair.
 
 
-Cautious:
+## Cautious:
 Our player will only play with pairs of cards and cards with an Ace and other
 card with the same suit. At flop/turn/river we will play based on the following rules:
 – If a 5 card hand (straight, flush, etc) is present raise:
