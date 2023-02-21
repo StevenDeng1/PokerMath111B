@@ -1,11 +1,15 @@
+import javafx.util.Pair;
+
 import java.util.*;
 
 public class Math111A {
 
-    public static Player.PlayStyle [] ourPlayStyles = {
+    public static Player.PlayStyle [] playStyles = {
             Player.PlayStyle.Aggressive,
             Player.PlayStyle.Normal,
             Player.PlayStyle.Cautious,
+            //Player.PlayStyle.Rookie,
+            //Player.PlayStyle.Tempo
     };
     public static Player.PlayStyle [] enemyPlayStyles = {
             Player.PlayStyle.Normal
@@ -20,10 +24,21 @@ public class Math111A {
         int totalSimulations = inputScanner.nextInt();
         System.out.print("Enter number of hands: ");
         int totalHands = inputScanner.nextInt();
-        Map<Player.PlayStyle, Integer> maxWinningsInTotalSimulations = new HashMap<>(Map.of(
-                Player.PlayStyle.Aggressive, 0,
-                Player.PlayStyle.Normal, 0,
-                Player.PlayStyle.Cautious, 0));
+
+        Map<Pair<Player.PlayStyle, Player.PlayStyle>, Integer> maxWinningsInTotalSimulations = new HashMap<>();
+        maxWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Aggressive, Player.PlayStyle.Aggressive), 0);
+        maxWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Aggressive, Player.PlayStyle.Normal), 0);
+        maxWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Aggressive, Player.PlayStyle.Cautious), 0);
+
+        maxWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Normal, Player.PlayStyle.Aggressive), 0);
+        maxWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Normal, Player.PlayStyle.Normal), 0);
+        maxWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Normal, Player.PlayStyle.Cautious), 0);
+
+        maxWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Cautious, Player.PlayStyle.Aggressive), 0);
+        maxWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Cautious, Player.PlayStyle.Normal), 0);
+        maxWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Cautious, Player.PlayStyle.Cautious), 0);
+
+        //TODO: add the other two new play styles
 
         Map<Player.PlayStyle, Integer> averageWinningsInTotalSimulations = new HashMap<>(Map.of(
                 Player.PlayStyle.Aggressive, 0,
@@ -33,31 +48,38 @@ public class Math111A {
 
         long startTime = System.nanoTime();
 
-        for(Player.PlayStyle ourPlayStyle : ourPlayStyles) {
-            for(int i =0; i<totalSimulations; i++) { //10000 simulations of 100 hands
-                int amountWon = game.play(totalHands, ourPlayStyle, Player.PlayStyle.Normal);
-                game = new SimulateGame(deck);
-                maxWinningsInTotalSimulations.put(ourPlayStyle,
-                        Math.max(amountWon, maxWinningsInTotalSimulations.get(ourPlayStyle)));
-                averageWinningsInTotalSimulations.put(ourPlayStyle,
-                        averageWinningsInTotalSimulations.getOrDefault(ourPlayStyle, 0)+amountWon);
+        for(Player.PlayStyle ourPlayStyle : playStyles) {
+            for(Player.PlayStyle enemyPlayStyle : playStyles){
+                System.out.println(String.format("%s vs %s",ourPlayStyle, enemyPlayStyle));
+                for (int i = 0; i < totalSimulations; i++) { //10000 simulations of 100 hands
+                    int amountWon = game.play(totalHands, ourPlayStyle, enemyPlayStyle);
+                    Pair<Player.PlayStyle, Player.PlayStyle> pairedPlayStyle = new Pair(ourPlayStyle, enemyPlayStyle);
+                    game = new SimulateGame(deck);
+                    maxWinningsInTotalSimulations.put(new Pair(ourPlayStyle, enemyPlayStyle),
+                            Math.max(amountWon, maxWinningsInTotalSimulations.get(pairedPlayStyle)));
+                    //averageWinningsInTotalSimulations.put(ourPlayStyle,
+                           // averageWinningsInTotalSimulations.getOrDefault(ourPlayStyle, 0) + amountWon);
             }
-            System.out.println(String.format("%s done",ourPlayStyle));
+                //System.out.println(String.format("%s done", ourPlayStyle));
+        }
         }
 
         System.out.println();
 
         System.out.println(String.format("Max winnings in %d simulations of %d hands:", totalSimulations, totalHands));
-        for(Map.Entry<Player.PlayStyle, Integer> playStyleIntegerEntry: maxWinningsInTotalSimulations.entrySet()){
-            System.out.println(playStyleIntegerEntry);
+        for(Map.Entry<Pair<Player.PlayStyle, Player.PlayStyle>, Integer> playStyleIntegerEntry: maxWinningsInTotalSimulations.entrySet()){
+            //System.out.println(playStyleIntegerEntry);
+            System.out.println(String.format("%s vs. %s : \n %d highest win amount", playStyleIntegerEntry.getKey().getKey(),
+                    playStyleIntegerEntry.getKey().getValue(), playStyleIntegerEntry.getValue()));
         }
 
+        /*
         System.out.println();
         System.out.println(String.format("Average winnings in %d simulations of %d hands:", totalSimulations, totalHands));
         for(Map.Entry<Player.PlayStyle, Integer> averageWinningsEntry: averageWinningsInTotalSimulations.entrySet()){
             System.out.println(String.format("%s=%d",averageWinningsEntry.getKey(), averageWinningsEntry.getValue()/totalSimulations));
         }
-
+*/
 
 
         long endTime = System.nanoTime();

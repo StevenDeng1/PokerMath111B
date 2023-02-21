@@ -57,7 +57,7 @@ public class SimulateGame {
             if(ourPlayer.chipAmount <=0 || enemyPlayer.chipAmount <=0){
                 break;
             }
-            System.out.println(ourPlayer.chipAmount);
+            //System.out.println(ourPlayer.chipAmount);
             //System.out.println(String.format("Game %d %s v. %s", i+1, ourPlayStyle, enemyPlayStile));
 
             if(rotationNum %2 == 0){
