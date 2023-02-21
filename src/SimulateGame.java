@@ -54,26 +54,30 @@ public class SimulateGame {
 
 
         for (int i = 0; i < numGames; i++) {
-            System.out.println(String.format("Game %d %s v. %s", i+1, ourPlayStyle, enemyPlayStile));
+            if(ourPlayer.chipAmount <=0 || enemyPlayer.chipAmount <=0){
+                break;
+            }
+            System.out.println(ourPlayer.chipAmount);
+            //System.out.println(String.format("Game %d %s v. %s", i+1, ourPlayStyle, enemyPlayStile));
 
             if(rotationNum %2 == 0){
-                System.out.println(String.format("small blind: our player, big bLind: enemy player"));
+                //System.out.println(String.format("small blind: our player, big bLind: enemy player"));
 
             }
             if(rotationNum%2 == 1){
-                System.out.println(String.format("small blind: enemy player, big bLind: our player"));
+                //System.out.println(String.format("small blind: enemy player, big bLind: our player"));
             }
 
-            System.out.println();
+            //System.out.println();
             Cards.Card[] pair1 = removeCards(2);
             Cards.Card[] pair2 = removeCards(2);
             ourPlayer.setPair(pair1);
             enemyPlayer.setPair(pair2);
 
             printCards("ourPlayer", pair1);
-            System.out.println();
+            //System.out.println();
             printCards("enemyPlayer", pair2);
-            System.out.println();
+            //System.out.println();
 
             if(rotationNum%2==0){
                 ourPlayer.chipAmount -= SMALL_BLIND_PAIR.getValue();
@@ -102,7 +106,7 @@ public class SimulateGame {
             }
 
             reset();
-            System.out.println();
+            //System.out.println();
         }
         return ourPlayer.chipAmount;
     }
@@ -151,7 +155,7 @@ public class SimulateGame {
                 printCards("cardsOut", cardsOut);
                 printCards("ourPlayer", ourPlayer.pair);
                 printCards("enemyPlayer", enemyPlayer.pair);
-                System.out.println();
+                //System.out.println();
                 roundPointer++;
             }
             if(rotationNum%2==0){
@@ -170,7 +174,7 @@ public class SimulateGame {
         player1.chipAmount += potSize/2;
         player2.chipAmount += potSize/2;
         this.potSize = 0;
-        System.out.println(printGameOutcome(outcome, winAndLostHand));
+        //System.out.println(printGameOutcome(outcome, winAndLostHand));
 
         return outcome;
     }
@@ -180,9 +184,9 @@ public class SimulateGame {
         winningPlayer.chipAmount+=this.potSize; //chips are removed from players as games on thus no subtract from losing player needed
         this.potSize = 0;
         if(winAndLostHand == null){
-            System.out.println("Other player folded");
+            //System.out.println("Other player folded");
         } else {
-            System.out.println(printGameOutcome(outcome, winAndLostHand));
+            //System.out.println(printGameOutcome(outcome, winAndLostHand));
         }
         return outcome;
     }
@@ -190,7 +194,7 @@ public class SimulateGame {
 
     public Pair<GameStatus, Integer> simulateRoundDecision(Player smallBlindPlayer, Player bigBlindPlayer, Cards.Card[] cardsOut,
                                       int potSize, Rules.Round round){
-        System.out.println(round.toString());
+        //System.out.println(round.toString());
 
         Player.PlayerMove firstPlayerMove = smallBlindPlayer.evalWithPlayStyle(null, cardsOut, potSize, round);
         if(this.rotationNum%2==0){
@@ -252,7 +256,7 @@ Remove cards from deck, setting the idx associated with card to null and then ad
  */
     public Cards.Card [] removeCards(int n){ //n represents num cards to remove
         Cards.Card [] cardsRemoved = new Cards.Card[n];
-       // System.out.printf("Removing %d cards from deck%n", n);
+       // //System.out.printf("Removing %d cards from deck%n", n);
         int cardCount = 0;
         int initialSize = removedMap.size();
         while(removedMap.size() < initialSize + n ){
@@ -262,10 +266,10 @@ Remove cards from deck, setting the idx associated with card to null and then ad
                 removedMap.put(cardIdxToRemove, card);
                 deck.set(cardIdxToRemove, null);
                 cardsRemoved[cardCount++] = card;
-                //System.out.printf("Removed %s from idx %d%n", card, cardIdxToRemove);
+                ////System.out.printf("Removed %s from idx %d%n", card, cardIdxToRemove);
             }
         }
-        //System.out.println(deck);
+        ////System.out.println(deck);
         return cardsRemoved;
     }
 
@@ -274,24 +278,24 @@ Remove cards from deck, setting the idx associated with card to null and then ad
     }
 
     public static void printChipStats(Player ourPlayer, Player enemyPlayer, int potSize){
-        System.out.println("~~~~~~~");
-        System.out.printf("our Player: %d%n", ourPlayer.chipAmount);
-        System.out.printf("enemy Player: %d%n", enemyPlayer.chipAmount);
-        System.out.printf("potSize: %d%n", potSize);
-        System.out.println("~~~~~~~");
+        //System.out.println("~~~~~~~");
+        //System.out.printf("our Player: %d%n", ourPlayer.chipAmount);
+        //System.out.printf("enemy Player: %d%n", enemyPlayer.chipAmount);
+        //System.out.printf("potSize: %d%n", potSize);
+        //System.out.println("~~~~~~~");
     }
 
     public static void printDecision(Player.PlayerMove move, boolean isOurPlayer){
         if(isOurPlayer){
-            System.out.printf("our player: %s %d%n", move.move, move.betAmount);
+            //System.out.printf("our player: %s %d%n", move.move, move.betAmount);
         } else{
-            System.out.printf("enemy player: %s %d%n", move.move, move.betAmount);
+            //System.out.printf("enemy player: %s %d%n", move.move, move.betAmount);
         }
 
     }
 
     public static void printCards(String belongTo, Cards.Card[] cards){
-        System.out.printf("%s: %s\t", belongTo, Arrays.toString(cards));
+        //System.out.printf("%s: %s\t", belongTo, Arrays.toString(cards));
     }
 
     public String printGameOutcome(GameOutcome outcome,

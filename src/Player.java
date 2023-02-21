@@ -41,13 +41,15 @@ public class Player {
     }
     public PlayerMove call(int callAmount){
         if(callAmount > chipAmount){
-            throw new java.lang.Error(String.format("ERROR, calling more than # chips"));
+            return new PlayerMove(PlayerMove.Move.Call, chipAmount);
+            //throw new java.lang.Error(String.format("ERROR, calling more than # chips"));
         }
         return new PlayerMove(PlayerMove.Move.Call, callAmount);
     }
     public PlayerMove raise(int raiseAmount){
         if(raiseAmount > chipAmount){
-            throw new java.lang.Error(String.format("ERROR, raising more than # chips"));
+            return new PlayerMove(PlayerMove.Move.Call, chipAmount);
+            //throw new java.lang.Error(String.format("ERROR, raising more than # chips"));
         }
         //chipAmount -= raiseAmount;
         return new PlayerMove(PlayerMove.Move.Raise, raiseAmount);
