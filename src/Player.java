@@ -273,6 +273,8 @@ public class Player {
         Aggressive,
         Normal,
         Cautious,
+        Tempo,
+        Rookie
     }
 
     class PlayerMove{
