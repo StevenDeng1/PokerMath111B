@@ -40,10 +40,17 @@ public class SimulateGame {
     public SimulateGame(List<Cards.Card> deck){
         this.deck = deck;
         removedMap= new HashMap<>();
-        ourPlayer = new Player(2500);
-        enemyPlayer = new Player(500);
+        ourPlayer = new Player(0);//= new Player(2500);
+        enemyPlayer = new Player(0);//= new Player(500);
         potSize = 0;
         rotationNum = 0;
+    }
+
+    public int play(int player1ChipAmount, int player2ChipAmount, int numGames, Player.PlayStyle ourPlayStyle,
+                    Player.PlayStyle enemyPlayStile){
+        ourPlayer = new Player(player1ChipAmount);
+        enemyPlayer = new Player(player2ChipAmount);
+        return play(numGames, ourPlayStyle, enemyPlayStile);
     }
 
     public int play(int numGames, Player.PlayStyle ourPlayStyle,
@@ -51,8 +58,8 @@ public class SimulateGame {
         ourPlayer.playStyle = ourPlayStyle;
         enemyPlayer.playStyle = enemyPlayStile;
         rotationNum = 0;
-
-
+        //System.out.println(ourPlayer.chipAmount);
+        //System.out.println(enemyPlayer.chipAmount);
         for (int i = 0; i < numGames; i++) {
             if(ourPlayer.chipAmount <=0 || enemyPlayer.chipAmount <=0){
                 break;
@@ -111,7 +118,7 @@ public class SimulateGame {
         return ourPlayer.chipAmount;
     }
 
-    public Pair<GameOutcome, Integer>  playRoundsInHand(Player smallBlindPlayer, Player bigBlindPlayer, int potSize){
+    public Pair<GameOutcome, Integer> playRoundsInHand(Player smallBlindPlayer, Player bigBlindPlayer, int potSize){
         int [] removeNumberOfCardsPerRound = {3,1,1};
         int roundPointer = 0;
         Cards.Card[] cardsOut = new Cards.Card[0];
@@ -220,6 +227,24 @@ public class SimulateGame {
         bigBlindPlayer.chipAmount-=secondPlayerMove.betAmount;
         if(secondPlayerMove.move.equals(Player.PlayerMove.Move.Fold)){
             return new Pair(GameStatus.Fold_Player_2, potSize);
+        }
+
+        if(firstPlayerMove.betAmount > bigBlindPlayer.bigBlind*1.5){
+            bigBlindPlayer.addPlayStyleGuess(Player.PlayStyle.Aggressive);
+        }
+        if(firstPlayerMove.betAmount < bigBlindPlayer.bigBlind*1.5 && firstPlayerMove.betAmount > 1){
+            bigBlindPlayer.addPlayStyleGuess(Player.PlayStyle.Normal);
+        } else {
+            bigBlindPlayer.addPlayStyleGuess(Player.PlayStyle.Cautious);
+        }
+
+        if(secondPlayerMove.betAmount > bigBlindPlayer.bigBlind*1.5){
+            smallBlindPlayer.addPlayStyleGuess(Player.PlayStyle.Aggressive);
+        }
+        if(secondPlayerMove.betAmount < bigBlindPlayer.bigBlind*1.5 && firstPlayerMove.betAmount > 1){
+            smallBlindPlayer.addPlayStyleGuess(Player.PlayStyle.Normal);
+        } else {
+            smallBlindPlayer.addPlayStyleGuess(Player.PlayStyle.Cautious);
         }
 
         if(round.equals(Rules.Round.River)){ //if river and neither player folded go to showdown

@@ -1,6 +1,6 @@
 import javafx.util.Pair;
 
-import java.util.Arrays;
+import java.util.*;
 
 public class Player {
     public enum CurrHandEnum {
@@ -17,6 +17,11 @@ public class Player {
     char blind;
     int bigBlind = 2;
     int smallBlind = bigBlind/2;
+
+    Queue<PlayStyle> predictedPreviousPlayStyle = new ArrayDeque<>(5);
+    int opponentChipAmount = 0;
+
+    List<PlayerMove> previousMoves = new ArrayList<>(5);
 
     public Player(int chipAmount, PlayStyle playStyle){
         this.chipAmount = chipAmount;
@@ -152,8 +157,186 @@ public class Player {
                 }
 
             }
+            case Tempo -> {
+                PlayStyle playStyle = predictOpponentPlayStyle(previousMoves, potSize);
+                if(playStyle.equals(PlayStyle.Aggressive)){
+                    return evalWithPlayStyleMethod(previousMove, cardsOut, potSize, round, PlayStyle.Cautious);
+                }
+                if(playStyle.equals(PlayStyle.Cautious)){
+                    return evalWithPlayStyleMethod(previousMove, cardsOut, potSize, round, PlayStyle.Aggressive);
+                }
+                if(playStyle.equals(PlayStyle.Normal)){
+                    return evalWithPlayStyleMethod(previousMove, cardsOut, potSize, round, PlayStyle.Normal);
+                }
+
+            }
+            case Rookie -> {
+                if(round == Rules.Round.Pre_Flop){
+                    if(previousMove == null) {
+                        if(inBestPreFlop(pair)) {
+                            return call(smallBlind);
+                        } else {
+                            return fold();
+                        }
+                    }
+                    if(previousMove != null) {
+                        PlayStyle playStyle = predictOpponentPlayStyle(previousMoves, potSize);
+                        if(playStyle.equals(PlayStyle.Aggressive)){
+                            return evalWithPlayStyleMethod(previousMove, cardsOut, potSize, round, PlayStyle.Cautious);
+                        }
+                        if(playStyle.equals(PlayStyle.Cautious)){
+                            return evalWithPlayStyleMethod(previousMove, cardsOut, potSize, round, PlayStyle.Aggressive);
+                        }
+                        if(playStyle.equals(PlayStyle.Normal)){
+                            return evalWithPlayStyleMethod(previousMove, cardsOut, potSize, round, PlayStyle.Normal);
+                        }
+                    }
+                }
+                if(round != Rules.Round.Pre_Flop) {
+                    if(previousMove == null) {
+                        PlayStyle playStyle = predictOpponentPlayStyle(previousMoves, potSize);
+                        if(playStyle.equals(PlayStyle.Aggressive)){
+                            return evalWithPlayStyleMethod(previousMove, cardsOut, potSize, round, PlayStyle.Cautious);
+                        }
+                        if(playStyle.equals(PlayStyle.Cautious)){
+                            return evalWithPlayStyleMethod(previousMove, cardsOut, potSize, round, PlayStyle.Aggressive);
+                        }
+                        if(playStyle.equals(PlayStyle.Normal)){
+                            return evalWithPlayStyleMethod(previousMove, cardsOut, potSize, round, PlayStyle.Normal);
+                        }
+                    }
+                    if(previousMove != null) {
+                        switch (previousMove.move) {
+                            case Check -> {
+                                if(getOpponentPlayStyle().equals(PlayStyle.Cautious)){
+                                  return evalWithPlayStyleMethod(previousMove, cardsOut, potSize, round, PlayStyle.Aggressive);
+                                } else {
+                                    return evalWithPlayStyleMethod(previousMove, cardsOut, potSize, round, PlayStyle.Normal);
+                                }
+                            }
+                            case Call -> {
+                                if(getOpponentPlayStyle().equals(PlayStyle.Cautious)){
+                                    return evalWithPlayStyleMethod(previousMove, cardsOut, potSize, round, PlayStyle.Aggressive);
+                                } else {
+                                    return evalWithPlayStyleMethod(previousMove, cardsOut, potSize, round, PlayStyle.Normal);
+                                }
+                            }
+                            case Raise -> {
+                                if(getOpponentPlayStyle().equals(PlayStyle.Cautious)) {
+                                    return evalWithPlayStyleMethod(previousMove, cardsOut, potSize, round, PlayStyle.Aggressive);
+                                } else {
+                                    return evalWithPlayStyleMethod(previousMove, cardsOut, potSize, round, PlayStyle.Normal);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
         throw new java.lang.Error("Out of Bounds move in player decision");
+    }
+
+    public PlayerMove evalWithPlayStyleMethod(PlayerMove previousMove, Cards.Card[] cardsOut, int potSize, Rules.Round round,
+                                                 PlayStyle userPlayStyle) {
+        switch (userPlayStyle) {
+            case Aggressive -> {
+                if (round == Rules.Round.Pre_Flop) {
+                    if (previousMove == null) {
+                        return call(smallBlind);
+                    }
+                    if (previousMove.move.equals(PlayerMove.Move.Call)) {
+                        return check();
+                    }
+                }
+                if (round != Rules.Round.Pre_Flop) {
+                    Pair<CurrHandEnum, Pair<Rules.PokerHand, Cards.Card[]>> evaluation = evalPairWithCardsOut(cardsOut);
+                    ;
+                    if (previousMove == null) {
+                        return betBasedOnPlayStyleFirstToGoAfterPreFlop(PlayStyle.Aggressive, evaluation, round, potSize, cardsOut);
+                    }
+                    if (previousMove != null) {
+                        return call(previousMove.betAmount);
+                    }
+                }
+            }
+            case Normal -> {
+                if (round == Rules.Round.Pre_Flop) {
+                    if (previousMove == null) {
+                        if (inBestPreFlop(pair)) {
+                            return call(smallBlind);
+                        } else {
+                            return fold();
+                        }
+                    }
+                    if (previousMove.move.equals(PlayerMove.Move.Call)) {
+                        return check();
+                    }
+                }
+                if (round != Rules.Round.Pre_Flop) {
+                    Pair<CurrHandEnum, Pair<Rules.PokerHand, Cards.Card[]>> evaluation = evalPairWithCardsOut(cardsOut);
+                    if (previousMove == null) { //sb
+                        return betBasedOnPlayStyleFirstToGoAfterPreFlop(PlayStyle.Normal, evaluation, round, potSize, cardsOut);
+                    }
+                    if (previousMove != null) {
+                        if (previousMove.move.equals(PlayerMove.Move.Check)) {
+                            return check();
+                        }
+                        if (previousMove.move.equals(PlayerMove.Move.Call)) {
+                            return check();
+                        }
+                        if (previousMove.move.equals(PlayerMove.Move.Raise)) {
+                            if (evaluation.getKey().compareTo(CurrHandEnum.nothing) > 0) {
+                                return call(previousMove.betAmount);
+                            } else {
+                                return fold();
+                            }
+                        }
+
+                    }
+                }
+            }
+            case Cautious -> {
+                if (round == Rules.Round.Pre_Flop) {
+                    if (previousMove == null) {
+                        if (inBestCautiousPreFlop(pair)) {
+                            return call(smallBlind);
+                        } else {
+                            return fold();
+                        }
+                    }
+                    if (previousMove.move.equals(PlayerMove.Move.Call)) {
+                        return check();
+                    }
+                }
+
+                if (round != Rules.Round.Pre_Flop) {
+                    Pair<CurrHandEnum, Pair<Rules.PokerHand, Cards.Card[]>> evaluation = evalPairWithCardsOut(cardsOut);
+                    if (previousMove == null) { //sb
+                        return betBasedOnPlayStyleFirstToGoAfterPreFlop(PlayStyle.Cautious, evaluation, round, potSize, cardsOut);
+                    }
+                    if (previousMove != null) {
+                        if (previousMove.move.equals(PlayerMove.Move.Check)) {
+                            return check();
+                        }
+                        if (previousMove.move.equals(PlayerMove.Move.Call)) {
+                            return check();
+                        }
+                        if (previousMove.move.equals(PlayerMove.Move.Raise)) {
+                            if (evaluation.getKey().compareTo(CurrHandEnum.fiveCard) >= 0) {
+                                return call(previousMove.betAmount);
+                            } else if (!evaluation.getKey().equals(CurrHandEnum.possibleFiveCard) &&
+                                    evaluation.getValue().getKey().compareTo(Rules.PokerHand.Two_Pair) >= 0) {
+                                return call(previousMove.betAmount);
+                            } else {
+                                return fold();
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
+        throw new Error("evalWithPlayStyleMethod broke");
     }
 
     private boolean inBestCautiousPreFlop(Cards.Card[] pair) {
@@ -238,6 +421,9 @@ public class Player {
                     }
                 }
             }
+            case Tempo -> {
+
+            }
         }
         return null;
     }
@@ -267,6 +453,58 @@ public class Player {
             return new Pair<>(CurrHandEnum.pairDoubleOrThreeCard, currHighestHand);
         }
         return new Pair<>(CurrHandEnum.nothing,currHighestHand);
+    }
+
+    public PlayStyle predictOpponentPlayStyle(List<PlayerMove> previousBets, int potSize){
+        int raiseCount = 0;
+        int checkCount = 0;
+        int callCount = 0;
+        int foldCount = 0;
+        int averageRaiseAmount = 0;
+        for(PlayerMove bet: previousBets){
+            if(bet.move.equals(PlayerMove.Move.Raise)){
+                raiseCount++;
+                averageRaiseAmount = (averageRaiseAmount*(raiseCount-1) + bet.betAmount)/raiseCount;
+            }
+            if(bet.move.equals(PlayerMove.Move.Check)){
+                checkCount++;
+            }
+            if(bet.move.equals(PlayerMove.Move.Call)){
+                callCount++;
+            }
+            if(bet.move.equals(PlayerMove.Move.Fold)){
+                foldCount++;
+            }
+        }
+        if(foldCount > callCount || foldCount > checkCount || foldCount > raiseCount){
+            return PlayStyle.Cautious;
+        }
+        if(raiseCount > checkCount && raiseCount > callCount){
+            if(averageRaiseAmount >= (int) bigBlind * Math.ceil(potSize /13)){
+                return PlayStyle.Aggressive;
+            }
+        }
+        return PlayStyle.Normal;
+    }
+
+    public PlayStyle getOpponentPlayStyle(){
+        Map<PlayStyle, Integer> playStyleCount = new HashMap<>();
+        Pair<PlayStyle, Integer> maxPlayAndCount = new Pair<>(null,0);
+        for (PlayStyle predictedPreviousPlayStyle : predictedPreviousPlayStyle){
+            int count = playStyleCount.getOrDefault(predictedPreviousPlayStyle,0)+1;
+            playStyleCount.put(predictedPreviousPlayStyle, count);
+            if(Math.max(count, maxPlayAndCount.getValue()) == count){
+                maxPlayAndCount = new Pair<>(predictedPreviousPlayStyle, count);
+            }
+        }
+        return maxPlayAndCount.getKey();
+    }
+
+    public void addPlayStyleGuess(PlayStyle playStyleGuess){
+        if(predictedPreviousPlayStyle.size()==5){
+            predictedPreviousPlayStyle.remove();
+        }
+        predictedPreviousPlayStyle.add(playStyleGuess);
     }
 
     public enum PlayStyle{

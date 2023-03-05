@@ -4,15 +4,14 @@ import java.util.*;
 
 public class Math111A {
 
+    public static Map<Pair<Player.PlayStyle, Player.PlayStyle>, Integer> averageWinningsInTotalSimulations;
+
     public static Player.PlayStyle [] playStyles = {
             Player.PlayStyle.Aggressive,
             Player.PlayStyle.Normal,
             Player.PlayStyle.Cautious,
-            //Player.PlayStyle.Rookie,
-            //Player.PlayStyle.Tempo
-    };
-    public static Player.PlayStyle [] enemyPlayStyles = {
-            Player.PlayStyle.Normal
+            Player.PlayStyle.Rookie,
+            Player.PlayStyle.Tempo
     };
 
     public static void main(String[] args) {
@@ -29,57 +28,86 @@ public class Math111A {
         maxWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Aggressive, Player.PlayStyle.Aggressive), 0);
         maxWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Aggressive, Player.PlayStyle.Normal), 0);
         maxWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Aggressive, Player.PlayStyle.Cautious), 0);
+        maxWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Aggressive, Player.PlayStyle.Tempo), 0);
+        maxWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Aggressive, Player.PlayStyle.Rookie), 0);
 
         maxWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Normal, Player.PlayStyle.Aggressive), 0);
         maxWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Normal, Player.PlayStyle.Normal), 0);
         maxWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Normal, Player.PlayStyle.Cautious), 0);
+        maxWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Normal, Player.PlayStyle.Tempo), 0);
+        maxWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Normal, Player.PlayStyle.Rookie), 0);
 
         maxWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Cautious, Player.PlayStyle.Aggressive), 0);
         maxWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Cautious, Player.PlayStyle.Normal), 0);
         maxWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Cautious, Player.PlayStyle.Cautious), 0);
+        maxWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Cautious, Player.PlayStyle.Tempo), 0);
+        maxWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Cautious, Player.PlayStyle.Rookie), 0);
+
+        maxWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Rookie, Player.PlayStyle.Aggressive), 0);
+        maxWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Rookie, Player.PlayStyle.Normal), 0);
+        maxWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Rookie, Player.PlayStyle.Cautious), 0);
+        maxWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Rookie, Player.PlayStyle.Tempo), 0);
+        maxWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Rookie, Player.PlayStyle.Rookie), 0);
+
+        maxWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Tempo, Player.PlayStyle.Aggressive), 0);
+        maxWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Tempo, Player.PlayStyle.Normal), 0);
+        maxWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Tempo, Player.PlayStyle.Cautious), 0);
+        maxWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Tempo, Player.PlayStyle.Tempo), 0);
+        maxWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Tempo, Player.PlayStyle.Rookie), 0);
+
 
         //TODO: add the other two new play styles
 
-        Map<Player.PlayStyle, Integer> averageWinningsInTotalSimulations = new HashMap<>(Map.of(
-                Player.PlayStyle.Aggressive, 0,
-                Player.PlayStyle.Normal, 0,
-                Player.PlayStyle.Cautious, 0));
 
+        Map<String, Pair<Integer, Integer>> statusMap = Map.of("Advantage", new Pair(2500, 500),
+                "Disadvantage", new Pair(500, 2500), "Equal", new Pair(1500, 1500));
 
         long startTime = System.nanoTime();
-
-        for(Player.PlayStyle ourPlayStyle : playStyles) {
-            for(Player.PlayStyle enemyPlayStyle : playStyles){
-                System.out.println(String.format("%s vs %s",ourPlayStyle, enemyPlayStyle));
-                for (int i = 0; i < totalSimulations; i++) { //10000 simulations of 100 hands
-                    int amountWon = game.play(totalHands, ourPlayStyle, enemyPlayStyle);
-                    Pair<Player.PlayStyle, Player.PlayStyle> pairedPlayStyle = new Pair(ourPlayStyle, enemyPlayStyle);
-                    game = new SimulateGame(deck);
-                    maxWinningsInTotalSimulations.put(new Pair(ourPlayStyle, enemyPlayStyle),
-                            Math.max(amountWon, maxWinningsInTotalSimulations.get(pairedPlayStyle)));
-                    //averageWinningsInTotalSimulations.put(ourPlayStyle,
-                           // averageWinningsInTotalSimulations.getOrDefault(ourPlayStyle, 0) + amountWon);
-            }
+        for (Map.Entry<String, Pair<Integer, Integer>> gameStatuses : statusMap.entrySet()) {
+            resetAverageWinnings();
+            System.out.println(gameStatuses.getKey());
+            for (Player.PlayStyle ourPlayStyle : playStyles) {
+                for (Player.PlayStyle enemyPlayStyle : playStyles) {
+                    System.out.println(String.format("%s vs %s", ourPlayStyle, enemyPlayStyle));
+                    for (int i = 0; i < totalSimulations; i++) { //10000 simulations of 100 hands
+                        //System.out.println(gameStatuses.getValue().getKey());
+                        //System.out.print(gameStatuses.getValue().getValue());
+                        int amountWon = game.play(gameStatuses.getValue().getKey(), gameStatuses.getValue().getValue(),
+                                totalHands, ourPlayStyle, enemyPlayStyle);
+                        Pair<Player.PlayStyle, Player.PlayStyle> pairedPlayStyle = new Pair(ourPlayStyle, enemyPlayStyle);
+                        game = new SimulateGame(deck);
+                        maxWinningsInTotalSimulations.put(new Pair(ourPlayStyle, enemyPlayStyle),
+                                Math.max(amountWon, maxWinningsInTotalSimulations.get(pairedPlayStyle)));
+                        averageWinningsInTotalSimulations.put(new Pair(ourPlayStyle, enemyPlayStyle),
+                                (averageWinningsInTotalSimulations.getOrDefault(new Pair(ourPlayStyle, enemyPlayStyle), 0) + amountWon)
+                        );
+                    }
+                }
                 //System.out.println(String.format("%s done", ourPlayStyle));
-        }
-        }
+            }
+            System.out.println();
+            System.out.println(String.format("Stats for %s match situation", gameStatuses.getKey()));
+/*
+            System.out.println(String.format("Max winnings in %d simulations of %d hands:", totalSimulations, totalHands));
+            for(Map.Entry<Pair<Player.PlayStyle, Player.PlayStyle>, Integer> playStyleIntegerEntry: maxWinningsInTotalSimulations.entrySet()){
+                //System.out.println(playStyleIntegerEntry);
+                System.out.println(String.format("%s vs. %s : \n %d highest win amount", playStyleIntegerEntry.getKey().getKey(),
+                        playStyleIntegerEntry.getKey().getValue(), playStyleIntegerEntry.getValue()));
+            }*/
 
-        System.out.println();
 
-        System.out.println(String.format("Max winnings in %d simulations of %d hands:", totalSimulations, totalHands));
-        for(Map.Entry<Pair<Player.PlayStyle, Player.PlayStyle>, Integer> playStyleIntegerEntry: maxWinningsInTotalSimulations.entrySet()){
-            //System.out.println(playStyleIntegerEntry);
-            System.out.println(String.format("%s vs. %s : \n %d highest win amount", playStyleIntegerEntry.getKey().getKey(),
-                    playStyleIntegerEntry.getKey().getValue(), playStyleIntegerEntry.getValue()));
-        }
+            System.out.println();
+            System.out.println(String.format("Average winnings in %d simulations of %d hands:", totalSimulations, totalHands));
+            for(Map.Entry<Pair<Player.PlayStyle, Player.PlayStyle>, Integer> playStyleIntegerEntry: averageWinningsInTotalSimulations.entrySet()){
+                System.out.println(String.format("%s vs. %s : \n %.2f%% from original", playStyleIntegerEntry.getKey().getKey(),
+                        playStyleIntegerEntry.getKey().getValue(),
+                        (double)playStyleIntegerEntry.getValue()/totalSimulations/gameStatuses.getValue().getKey()*100
+                ));
+            }
+            System.out.println();
+    }
 
-        /*
-        System.out.println();
-        System.out.println(String.format("Average winnings in %d simulations of %d hands:", totalSimulations, totalHands));
-        for(Map.Entry<Player.PlayStyle, Integer> averageWinningsEntry: averageWinningsInTotalSimulations.entrySet()){
-            System.out.println(String.format("%s=%d",averageWinningsEntry.getKey(), averageWinningsEntry.getValue()/totalSimulations));
-        }
-*/
+
 
 
         long endTime = System.nanoTime();
@@ -103,6 +131,39 @@ public class Math111A {
        */
 
         //System.out.println(Rules.rf/totalSimulations);
+    }
+
+    public static void resetAverageWinnings() {
+        averageWinningsInTotalSimulations = new HashMap<>();
+        averageWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Aggressive, Player.PlayStyle.Aggressive), 0);
+        averageWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Aggressive, Player.PlayStyle.Normal), 0);
+        averageWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Aggressive, Player.PlayStyle.Cautious), 0);
+        averageWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Aggressive, Player.PlayStyle.Tempo), 0);
+        averageWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Aggressive, Player.PlayStyle.Rookie), 0);
+
+        averageWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Normal, Player.PlayStyle.Aggressive), 0);
+        averageWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Normal, Player.PlayStyle.Normal), 0);
+        averageWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Normal, Player.PlayStyle.Cautious), 0);
+        averageWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Normal, Player.PlayStyle.Tempo), 0);
+        averageWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Normal, Player.PlayStyle.Rookie), 0);
+
+        averageWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Cautious, Player.PlayStyle.Aggressive), 0);
+        averageWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Cautious, Player.PlayStyle.Normal), 0);
+        averageWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Cautious, Player.PlayStyle.Cautious), 0);
+        averageWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Cautious, Player.PlayStyle.Tempo), 0);
+        averageWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Cautious, Player.PlayStyle.Rookie), 0);
+
+        averageWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Rookie, Player.PlayStyle.Aggressive), 0);
+        averageWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Rookie, Player.PlayStyle.Normal), 0);
+        averageWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Rookie, Player.PlayStyle.Cautious), 0);
+        averageWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Rookie, Player.PlayStyle.Tempo), 0);
+        averageWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Rookie, Player.PlayStyle.Rookie), 0);
+
+        averageWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Tempo, Player.PlayStyle.Aggressive), 0);
+        averageWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Tempo, Player.PlayStyle.Normal), 0);
+        averageWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Tempo, Player.PlayStyle.Cautious), 0);
+        averageWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Tempo, Player.PlayStyle.Tempo), 0);
+        averageWinningsInTotalSimulations.put(new Pair<>(Player.PlayStyle.Tempo, Player.PlayStyle.Rookie), 0);
     }
 
 /*
