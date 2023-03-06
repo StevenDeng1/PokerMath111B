@@ -160,7 +160,7 @@ public class Player {
             case Tempo -> {
                 PlayStyle playStyle = predictOpponentPlayStyle(previousMoves, potSize);
                 if(playStyle.equals(PlayStyle.Aggressive)){
-                    return evalWithPlayStyleMethod(previousMove, cardsOut, potSize, round, PlayStyle.Cautious);
+                    return evalWithPlayStyleMethod(previousMove, cardsOut, potSize, round, PlayStyle.Aggressive);
                 }
                 if(playStyle.equals(PlayStyle.Cautious)){
                     return evalWithPlayStyleMethod(previousMove, cardsOut, potSize, round, PlayStyle.Aggressive);
@@ -421,11 +421,19 @@ public class Player {
                     }
                 }
             }
-            case Tempo -> {
-
-            }
         }
         return null;
+    }
+    public PlayerMove reraise(PlayerMove previousMove, Cards.Card[] cardsOut, int potSize, Rules.Round round,
+                              PlayStyle userPlayStyle) {
+        return evalWithPlayStyleMethod(previousMove, cardsOut, potSize, round, userPlayStyle);
+    }
+    public PlayerMove bluff(PlayerMove previousMove, Cards.Card[] cardsOut, int potSize, Rules.Round round,
+                              PlayStyle userPlayStyle) {
+        if((int)(Math.random()*52) > 40 ){
+            return evalWithPlayStyleMethod(previousMove, cardsOut, potSize, round, userPlayStyle);
+        }
+            return null;
     }
 
     private double getClosestHandProb(Pair<Rules.PokerHand,Cards.Card[]> bestHand) {

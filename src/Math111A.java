@@ -65,7 +65,7 @@ public class Math111A {
         long startTime = System.nanoTime();
         for (Map.Entry<String, Pair<Integer, Integer>> gameStatuses : statusMap.entrySet()) {
             resetAverageWinnings();
-            System.out.println(gameStatuses.getKey());
+            System.out.println(String.format("\t%s", gameStatuses.getKey()));
             for (Player.PlayStyle ourPlayStyle : playStyles) {
                 for (Player.PlayStyle enemyPlayStyle : playStyles) {
                     System.out.println(String.format("%s vs %s", ourPlayStyle, enemyPlayStyle));
